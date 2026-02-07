@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import tempfile, subprocess, os
+import os
+import tempfile
+import subprocess
 
 app = Flask(__name__)
 CORS(app)
@@ -21,6 +23,7 @@ def analyze():
     if not code.strip():
         return jsonify({"status": "error", "message": "No code provided"})
 
+    # Python code checking
     if language == "Python":
         try:
             compile(code, "<string>", "exec")
@@ -28,36 +31,17 @@ def analyze():
             return jsonify({"status": "error", "message": str(e), "line": e.lineno})
         return jsonify({"status": "success", "message": "No syntax errors"})
 
+    # Java placeholder
     if language == "Java":
-        return check_java_syntax(code)
+        return jsonify({"status": "error", "message": "Java checking not supported on this deployment yet"})
 
+    # C++ placeholder
     if language == "C++":
-        return check_cpp_syntax(code)
+        return jsonify({"status": "error", "message": "C++ checking not supported on this deployment yet"})
 
     return jsonify({"status": "error", "message": "Unsupported language"})
 
-# Helper functions
-def check_java_syntax(code):
-    with tempfile.TemporaryDirectory() as tmpdir:
-        path = os.path.join(tmpdir, "Main.java")
-        with open(path, "w") as f:
-            f.write(code)
-        result = subprocess.run(["javac", path], capture_output=True, text=True)
-        if result.returncode != 0:
-            return {"status": "error", "message": result.stderr}
-        return {"status": "success", "message": "No syntax errors"}
-
-def check_cpp_syntax(code):
-    with tempfile.TemporaryDirectory() as tmpdir:
-        path = os.path.join(tmpdir, "main.cpp")
-        with open(path, "w") as f:
-            f.write(code)
-        result = subprocess.run(["g++", "-fsyntax-only", path], capture_output=True, text=True)
-        if result.returncode != 0:
-            return {"status": "error", "message": result.stderr}
-        return {"status": "success", "message": "No syntax errors"}
-
-# ✅ This is the critical fix for Railway
+# ✅ Railway-ready run command
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 3000))  # Use Railway's assigned port
-    app.run(host="0.0.0.0", port=port)        # Bind to all interfaces
+    port = int(os.environ.get("PORT", 3000))  # Railway assigns the port
+    app.run(host="0.0.0.0", port=port)

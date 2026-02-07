@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Code Debugging Website</title>
+  <link rel="stylesheet" href="Debug Code Page.css">
+</head>
+
+<body>
+
+<!-- HEADER / NAVBAR -->
+<header class="header">
+  <div class="logo-container">
+    <img src="logo.png" alt="Logo" class="logo-image">
+    <h1 class="site-title">AI Code Debugging Website</h1>
+  </div>
+
+  <nav class="nav">
+    <ul class="nav-left">
+      <li class="nav-item">Home</li>
+      <li class="nav-item nav-item-bold">Debug Code</li>
+      <li class="nav-item">About</li>
+    </ul>
+  </nav>
+</header>
+
+<!-- DEBUG SECTION WITH BACKGROUND IMAGE -->
+<section class="debug-section">
+  <div class="debug-box">
+    <h2>Paste your code here:</h2>
+
+    <textarea id="codeInput" placeholder="// Enter your code here..."></textarea>
+
+    <div class="controls">
+      <select id="language">
+        <option>Python</option>
+        <option>Java</option>
+        <option>C++</option>
+      </select>
+
+      <button onclick="getSuggestions()">Get Suggestions</button>
+    </div>
+  </div>
+</section>
+
+<!-- AI SUGGESTIONS OUTPUT -->
+<section class="suggestions-section" id="suggestionsBox">
+  <h3>AI Suggestions</h3>
+  <p class="error-text" id="errorText"></p>
+</section>
+
+<script src="debug.js"></script>
+</body>
+</html>

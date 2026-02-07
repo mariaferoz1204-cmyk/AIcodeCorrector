@@ -1,0 +1,138 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Header container */
+.header {
+  display: flex;
+  align-items: center;       /* vertically center all items */
+  justify-content: space-between; /* logo on left, nav on right */
+  padding: 20px 50px;        /* adjust spacing around */
+  max-width: 1444px;
+  margin: auto;
+  height: 154px;
+  position: relative;
+}
+
+/* Logo */
+.logo-image {
+  width: 83px;
+  height: 83px;
+}
+
+/* Site title */
+.site-title {
+  font-size: 32px;
+  font-weight: 500;
+  
+  color: black;
+ 
+  margin-left: 290px; /* space between logo and title */
+margin-top:-70px; /* center the title */
+
+}
+
+/* Navigation container */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* space between left and right nav sections */
+}
+
+/* Left nav items */
+.nav-left {
+  display: flex;
+  gap: 10px; /* spacing between Home, Debug Code, About */
+  list-style: none;
+margin-top:100px ;
+}
+
+.nav-item {
+  font-size: 16px;
+  font-weight: 500;
+  color: #36384E;
+  cursor: pointer;
+ 
+}
+
+.nav-item-bold {
+  font-weight: 700;
+}
+
+/* Right nav items */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* spacing between LOGIN and SIGN UP */
+  margin-top:100px ;
+}
+
+.login {
+  font-size: 16px;
+  font-weight: 600;
+  color: black;
+  cursor: pointer;
+}
+
+.signup {
+  padding: 10px 20px;
+  background-color: #E5B300;
+  border: none;
+  color: #F5F5F5;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+/* HERO SECTION */
+.hero {
+  width: 100%;
+  height: 600px; /* adjust height as needed */
+  background-image: url('background.png'); /* your uploaded image */
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.hero-overlay {
+  text-align: center;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.4); /* dark overlay for readability */
+  padding: 50px;
+  border-radius: 10px;
+}
+
+.hero-overlay h2 {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.hero-overlay .highlight {
+  background-color: #E5B300;
+  padding: 0 8px;
+  color: black;
+}
+
+.hero-overlay p {
+  font-size: 18px;
+  margin-bottom: 30px;
+}
+
+.start-debugging {
+  padding: 15px 30px;
+  background-color: black;
+  color: white;
+  border: none;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 5px;
+}
