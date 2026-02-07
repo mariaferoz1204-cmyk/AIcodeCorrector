@@ -56,3 +56,8 @@ def check_cpp_syntax(code):
         if result.returncode != 0:
             return {"status": "error", "message": result.stderr}
         return {"status": "success", "message": "No syntax errors"}
+
+# ✅ This is the critical fix for Railway
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 3000))  # Use Railway's assigned port
+    app.run(host="0.0.0.0", port=port)        # Bind to all interfaces
