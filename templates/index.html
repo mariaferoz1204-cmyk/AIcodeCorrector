@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Code Debugging</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <title>AI Code Debugger</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/homestyle.css') }}">
 </head>
 <body>
 
   <!-- HEADER -->
   <header class="header">
-    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo-image">
-    <h1 class="site-title">AI Code Debugger</h1>
+    <div class="header-left">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo-image">
+      <h1 class="site-title">AI Code Debugger</h1>
+    </div>
     
     <nav class="nav">
       <ul class="nav-left">
