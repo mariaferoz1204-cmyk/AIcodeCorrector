@@ -1,17 +1,31 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import ast
-import subprocess
-import tempfile
-import os
 import traceback
 
 app = Flask(__name__)
 CORS(app)  # allows frontend to call backend
 
+
+# ✅ Health check route (VERY IMPORTANT for Vercel)
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({
+        "status": "ok",
+        "message": "AI Code Corrector backend is running"
+    })
+
+
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    data = request.json
+    # ✅ Safe JSON handling (prevents 500 crash)
+    data = request.get_json(silent=True)
+
+    if not data:
+        return jsonify({
+            "status": "error",
+            "message": "Invalid or missing JSON body"
+        }), 400
+
     code = data.get("code", "")
     language = data.get("language", "")
 
@@ -28,7 +42,7 @@ def analyze():
     if language == "Python":
         # 1️⃣ Syntax check
         try:
-            compile(code, "<string>", "exec")  # checks Python syntax
+            compile(code, "<string>", "exec")
         except SyntaxError as e:
             return jsonify({
                 "status": "error",
@@ -38,26 +52,13 @@ def analyze():
                 "explanation": "Python requires proper indentation, colons (:), and closed strings."
             })
 
-        # 2️⃣ Runtime check
-        try:
-            exec(code, {})  # run code safely in empty namespace
-        except Exception as e:
-            # Try to get line number from traceback if available
-            tb = traceback.extract_tb(e.__traceback__)
-            line_no = tb[-1].lineno if tb else "-"
-            return jsonify({
-                "status": "error",
-                "language": "Python",
-                "line": line_no,
-                "message": f"{type(e).__name__}: {str(e)}",
-                "explanation": "Python runtime error occurred while executing your code."
-            })
+        # ⚠️ Runtime execution REMOVED for Vercel safety
+        # Serverless functions should NOT exec arbitrary code
 
-        # No errors found
         return jsonify({
             "status": "success",
             "language": "Python",
-            "explanation": "Your Python code has no syntax or runtime errors!"
+            "explanation": "Your Python code has no syntax errors!"
         })
 
     # ---------------- JAVA ----------------
@@ -86,5 +87,5 @@ def analyze():
     })
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# ❌ DO NOT run app.run() on Vercel
+# Vercel handles execution itself
