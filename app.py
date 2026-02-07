@@ -1,16 +1,16 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-import os
-import tempfile
-import subprocess
+import os, tempfile, subprocess
 
 app = Flask(__name__)
 CORS(app)
 
+# Serve homepage
 @app.route("/", methods=["GET"])
 def home():
-    return jsonify({"status": "ok", "message": "AI Code Corrector backend is running"})
+    return render_template("index.html")  # loads index.html from templates folder
 
+# Analyze code endpoint (your existing code)
 @app.route("/analyze", methods=["POST"])
 def analyze():
     data = request.get_json(silent=True)
@@ -23,7 +23,6 @@ def analyze():
     if not code.strip():
         return jsonify({"status": "error", "message": "No code provided"})
 
-    # Python code checking
     if language == "Python":
         try:
             compile(code, "<string>", "exec")
@@ -31,17 +30,14 @@ def analyze():
             return jsonify({"status": "error", "message": str(e), "line": e.lineno})
         return jsonify({"status": "success", "message": "No syntax errors"})
 
-    # Java placeholder
+    # Temporary placeholders for Java/C++
     if language == "Java":
-        return jsonify({"status": "error", "message": "Java checking not supported on this deployment yet"})
-
-    # C++ placeholder
+        return jsonify({"status": "error", "message": "Java not supported yet"})
     if language == "C++":
-        return jsonify({"status": "error", "message": "C++ checking not supported on this deployment yet"})
+        return jsonify({"status": "error", "message": "C++ not supported yet"})
 
     return jsonify({"status": "error", "message": "Unsupported language"})
 
-# ✅ Railway-ready run command
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 3000))  # Railway assigns the port
+    port = int(os.environ.get("PORT", 3000))
     app.run(host="0.0.0.0", port=port)
