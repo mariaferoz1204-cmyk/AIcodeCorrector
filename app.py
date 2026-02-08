@@ -8,8 +8,8 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# Session Security
-app.secret_key = os.environ.get("SECRET_KEY", "ai_corrector_dev_key_123")
+# Session Security - Hardcoded for stability on Railway
+app.secret_key = "ai_debugger_secure_key_2024"
 
 # --- DATABASE CONFIGURATION ---
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -43,8 +43,10 @@ def signup():
         username = request.form.get("username")
         email = request.form.get("email")
         password = request.form.get("password")
+        
         if User.query.filter_by(email=email).first():
             return "Email already registered.", 400
+            
         hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
         new_user = User(username=username, email=email, password=hashed_pw)
         db.session.add(new_user)
@@ -58,10 +60,11 @@ def login():
         email = request.form.get("email")
         password = request.form.get("password")
         user = User.query.filter_by(email=email).first()
+        
         if user and check_password_hash(user.password, password):
+            session.clear() # Clear any old/broken sessions
             session["user_id"] = user.id
             session["user"] = user.username
-            session["email"] = user.email 
             return redirect(url_for("home"))
         return "Invalid credentials", 401
     return render_template("login.html")
@@ -73,18 +76,17 @@ def logout():
 
 # --- PAGE ROUTES ---
 
-@app.route("/", methods=["GET"])
+@app.route("/")
 def home():
     if "user_id" not in session:
         return redirect(url_for("login"))
-    # Passing 'user' ensures {{ user }} in index.html works
     return render_template("index.html", user=session.get("user"))
 
 @app.route("/about")
 def about():
+    # Adding a session check so users must be logged in to see about
     if "user_id" not in session:
         return redirect(url_for("login"))
-    # Passing 'user' ensures the navbar in about.html doesn't crash
     return render_template("about.html", user=session.get("user"))
 
 @app.route("/history")
@@ -94,11 +96,11 @@ def view_history():
     
     user = User.query.get(session["user_id"])
     if not user:
-        session.clear() 
+        session.clear()
         return redirect(url_for("login"))
         
     user_history = History.query.filter_by(user_id=user.id).order_by(History.timestamp.desc()).all()
-    return render_template("history.html", history=user_history, user=session.get("user"))
+    return render_template("history.html", history=user_history, user=user.username)
 
 # --- ANALYZER LOGIC ---
 
@@ -110,11 +112,11 @@ def analyze():
     data = request.get_json(silent=True)
     code = data.get("code", "")
     language = data.get("language", "Python")
-    user_id = session["user_id"]
-
+    
     status = "success"
     message = "No syntax errors found!"
 
+    # Basic Logic Check
     if language == "Python":
         try:
             compile(code, "<string>", "exec")
@@ -122,23 +124,12 @@ def analyze():
             status = "error"
             message = f"Python Syntax Error: {str(e)}"
     
-    elif language in ["Java", "C++"]:
-        stripped_code = code.strip()
-        if not stripped_code.endswith(";") and not stripped_code.endswith("}"):
-            status = "error"
-            message = f"{language} Error: Possible missing semicolon ';' at the end of the statement."
-        elif code.count("{") != code.count("}"):
-            status = "error"
-            message = f"{language} Error: Mismatched curly braces {{ }}."
-        elif code.count("(") != code.count(")"):
-            status = "error"
-            message = f"{language} Error: Mismatched parentheses ( )."
-
+    # Save to history
     new_entry = History(
         code_content=code,
         result=message,
         language=language,
-        user_id=user_id
+        user_id=session["user_id"]
     )
     db.session.add(new_entry)
     db.session.commit()

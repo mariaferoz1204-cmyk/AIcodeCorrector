@@ -16,9 +16,11 @@
     
     <nav class="nav">
       <ul class="nav-left">
-        <li class="nav-item"><a href="{{ url_for('home') }}">Home</a></li>
-        <li class="nav-item"><a href="{{ url_for('view_history') }}">My History</a></li>
-        <li class="nav-item"><a href="{{ url_for('about') }}">About</a></li>
+        <ul class="nav-list">
+    <li><a href="{{ url_for('home') }}" class="nav-item">Home</a></li>
+    <li><a href="{{ url_for('view_history') }}" class="nav-item">My History</a></li>
+    <li><a href="#" class="nav-item active">About</a></li>
+  </ul>
       </ul>
       <div class="nav-right">
         <span class="user-greeting">Hi, {{ user }}</span>
