@@ -59,7 +59,6 @@ def login():
         password = request.form.get("password")
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, password):
-            # Storing ID is safer for database lookups than just the email
             session["user_id"] = user.id
             session["user"] = user.username
             session["email"] = user.email 
@@ -76,31 +75,30 @@ def logout():
 
 @app.route("/", methods=["GET"])
 def home():
-    if "user" not in session:
+    if "user_id" not in session:
         return redirect(url_for("login"))
-    return render_template("index.html", user=session["user"])
+    # Passing 'user' ensures {{ user }} in index.html works
+    return render_template("index.html", user=session.get("user"))
 
 @app.route("/about")
 def about():
-    # Check session to ensure logged in users only, or remove if public
-    if "user" not in session:
+    if "user_id" not in session:
         return redirect(url_for("login"))
-    return render_template("about.html")
+    # Passing 'user' ensures the navbar in about.html doesn't crash
+    return render_template("about.html", user=session.get("user"))
 
 @app.route("/history")
 def view_history():
     if "user_id" not in session:
         return redirect(url_for("login"))
     
-    # Use user_id for the most direct database lookup
     user = User.query.get(session["user_id"])
-    
     if not user:
-        session.clear() # Clear corrupt session
-        return "User not found. Please log in again.", 404
+        session.clear() 
+        return redirect(url_for("login"))
         
     user_history = History.query.filter_by(user_id=user.id).order_by(History.timestamp.desc()).all()
-    return render_template("history.html", history=user_history)
+    return render_template("history.html", history=user_history, user=session.get("user"))
 
 # --- ANALYZER LOGIC ---
 
@@ -112,7 +110,6 @@ def analyze():
     data = request.get_json(silent=True)
     code = data.get("code", "")
     language = data.get("language", "Python")
-    
     user_id = session["user_id"]
 
     status = "success"
