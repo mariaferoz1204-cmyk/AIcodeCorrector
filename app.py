@@ -59,8 +59,9 @@ def login():
         password = request.form.get("password")
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, password):
+            # Added email to session as requested
             session["user"] = user.username
-            session["email"] = user.email
+            session["email"] = user.email 
             return redirect(url_for("home"))
         return "Invalid credentials", 401
     return render_template("login.html")
@@ -70,7 +71,7 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
-# --- CORE PAGE ROUTES ---
+# --- PAGE ROUTES ---
 
 @app.route("/", methods=["GET"])
 def home():
@@ -88,11 +89,17 @@ def about():
 def view_history():
     if "user" not in session:
         return redirect(url_for("login"))
-    user = User.query.filter_by(username=session["user"]).first()
+    
+    # Safer lookup using email from session
+    user = User.query.filter_by(email=session.get("email")).first()
+    
+    if not user:
+        return "User not found. Please log in again.", 404
+        
     user_history = History.query.filter_by(user_id=user.id).order_by(History.timestamp.desc()).all()
     return render_template("history.html", history=user_history)
 
-# --- API ANALYSIS ROUTE ---
+# --- ANALYZER LOGIC ---
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -102,7 +109,8 @@ def analyze():
     data = request.get_json(silent=True)
     code = data.get("code", "")
     language = data.get("language", "Python")
-    user = User.query.filter_by(username=session["user"]).first()
+    
+    user = User.query.filter_by(email=session.get("email")).first()
 
     status = "success"
     message = "No syntax errors found!"
@@ -114,7 +122,7 @@ def analyze():
             status = "error"
             message = f"Python Syntax Error: {str(e)}"
     
-    elif language == "Java" or language == "C++":
+    elif language in ["Java", "C++"]:
         stripped_code = code.strip()
         if not stripped_code.endswith(";") and not stripped_code.endswith("}"):
             status = "error"

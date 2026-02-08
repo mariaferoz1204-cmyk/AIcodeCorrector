@@ -16,13 +16,13 @@
     
     <nav class="nav">
       <ul class="nav-left">
-        <li class="nav-item"><a href="/">Home</a></li>
-        <li class="nav-item"><a href="/history">My History</a></li>
-        <li class="nav-item">About</li>
+        <li class="nav-item"><a href="{{ url_for('home') }}">Home</a></li>
+        <li class="nav-item"><a href="{{ url_for('view_history') }}">My History</a></li>
+        <li class="nav-item"><a href="{{ url_for('about') }}">About</a></li>
       </ul>
       <div class="nav-right">
         <span class="user-greeting">Hi, {{ user }}</span>
-        <a href="/logout" class="signup" style="text-decoration: none; text-align: center;">LOGOUT</a>
+        <a href="{{ url_for('logout') }}" class="signup" style="text-decoration: none; text-align: center;">LOGOUT</a>
       </div>
     </nav>
   </header>
