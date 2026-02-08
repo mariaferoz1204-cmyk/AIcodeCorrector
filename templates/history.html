@@ -6,13 +6,44 @@
     <title>My History - AI Code Debugger</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/historystyle.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Top Navigation for History Page */
+        .history-nav {
+            background-color: #ffffff;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .nav-links a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover {
+            color: #4A90E2;
+        }
+    </style>
 </head>
 <body>
+
+    <nav class="history-nav">
+        <div class="logo"><strong>AI Debugger</strong></div>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('about') }}">About</a>
+            <a href="{{ url_for('logout') }}" style="color: #d9534f;">Logout</a>
+        </div>
+    </nav>
 
     <div class="history-wrapper">
         <div class="history-header">
             <h1>My Debugging History</h1>
-            <a href="/" class="back-btn">← Back to Analyzer</a>
+            <a href="{{ url_for('home') }}" class="back-btn">← Back to Analyzer</a>
         </div>
 
         <div class="table-container">
