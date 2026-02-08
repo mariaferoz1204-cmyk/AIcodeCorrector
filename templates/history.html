@@ -7,36 +7,34 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/historystyle.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* Top Navigation for History Page */
-        .history-nav {
-            background-color: #ffffff;
-            padding: 1rem 2rem;
+        /* Updated navigation styles for the history page */
+        .history-navbar {
+            background-color: #333;
+            padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
+            color: white;
         }
-        .nav-links a {
-            margin-left: 20px;
+        .history-navbar a {
+            color: white;
             text-decoration: none;
-            color: #333;
+            margin-left: 20px;
             font-weight: 500;
-            transition: color 0.3s;
         }
-        .nav-links a:hover {
-            color: #4A90E2;
+        .history-navbar a:hover {
+            color: #f4b400;
         }
     </style>
 </head>
 <body>
 
-    <nav class="history-nav">
+    <nav class="history-navbar">
         <div class="logo"><strong>AI Debugger</strong></div>
-        <div class="nav-links">
+        <div class="links">
             <a href="{{ url_for('home') }}">Home</a>
             <a href="{{ url_for('about') }}">About</a>
-            <a href="{{ url_for('logout') }}" style="color: #d9534f;">Logout</a>
+            <a href="{{ url_for('logout') }}" style="color: #ff6b6b;">Logout</a>
         </div>
     </nav>
 

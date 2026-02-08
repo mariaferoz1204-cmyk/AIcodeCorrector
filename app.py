@@ -16,7 +16,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# --- DATABASE MODELS (Existing Context Kept) ---
+# --- DATABASE MODELS ---
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False)
@@ -70,7 +70,7 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
-# --- UPDATED CODE ANALYZER (Supports Python, Java, C++) ---
+# --- CORE PAGE ROUTES ---
 
 @app.route("/", methods=["GET"])
 def home():
@@ -78,12 +78,21 @@ def home():
         return redirect(url_for("login"))
     return render_template("index.html", user=session["user"])
 
-# ADDED ABOUT ROUTE
 @app.route("/about")
 def about():
     if "user" not in session:
         return redirect(url_for("login"))
     return render_template("about.html")
+
+@app.route("/history")
+def view_history():
+    if "user" not in session:
+        return redirect(url_for("login"))
+    user = User.query.filter_by(username=session["user"]).first()
+    user_history = History.query.filter_by(user_id=user.id).order_by(History.timestamp.desc()).all()
+    return render_template("history.html", history=user_history)
+
+# --- API ANALYSIS ROUTE ---
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -98,7 +107,6 @@ def analyze():
     status = "success"
     message = "No syntax errors found!"
 
-    # --- MULTI-LANGUAGE LOGIC ---
     if language == "Python":
         try:
             compile(code, "<string>", "exec")
@@ -107,12 +115,10 @@ def analyze():
             message = f"Python Syntax Error: {str(e)}"
     
     elif language == "Java" or language == "C++":
-        # Check for missing semicolons (basic syntax check)
         stripped_code = code.strip()
         if not stripped_code.endswith(";") and not stripped_code.endswith("}"):
             status = "error"
             message = f"{language} Error: Possible missing semicolon ';' at the end of the statement."
-        # Check for bracket balance
         elif code.count("{") != code.count("}"):
             status = "error"
             message = f"{language} Error: Mismatched curly braces {{ }}."
@@ -120,7 +126,6 @@ def analyze():
             status = "error"
             message = f"{language} Error: Mismatched parentheses ( )."
 
-    # SAVE TO HISTORY (Keep records for user)
     new_entry = History(
         code_content=code,
         result=message,
@@ -131,14 +136,6 @@ def analyze():
     db.session.commit()
 
     return jsonify({"status": status, "message": message})
-
-@app.route("/history")
-def view_history():
-    if "user" not in session:
-        return redirect(url_for("login"))
-    user = User.query.filter_by(username=session["user"]).first()
-    user_history = History.query.filter_by(user_id=user.id).order_by(History.timestamp.desc()).all()
-    return render_template("history.html", history=user_history)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000, debug=True)
