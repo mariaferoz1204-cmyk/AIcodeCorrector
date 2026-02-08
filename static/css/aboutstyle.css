@@ -1,0 +1,110 @@
+/* General Setup */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #fff;
+    overflow-x: hidden;
+}
+
+/* Header Styling */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 80px;
+    background: #fff;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo-image {
+    width: 50px;
+    height: auto;
+}
+
+.site-title {
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.nav-list {
+    display: flex;
+    list-style: none;
+    gap: 40px;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: #555;
+    font-size: 16px;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+/* Active Page State - Bold like in your picture */
+.nav-item.active {
+    font-weight: 800;
+    color: #000;
+}
+
+/* Layout for the About Section */
+.main-wrapper {
+    width: 100%;
+    padding: 20px 40px;
+}
+
+.circuit-bg {
+    width: 100%;
+    min-height: 85vh;
+    background: #D9D9D9 url('https://placehold.co/1674x940') no-repeat center center;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+/* The Grey Box from your screenshot */
+.description-card {
+    width: 85%;
+    max-width: 1200px;
+    background-color: rgba(217, 217, 217, 0.96);
+    padding: 100px 60px;
+    position: relative;
+    box-shadow: 0px 4px 20px rgba(0,0,0,0.05);
+}
+
+/* Yellow Ribbon */
+.about-label {
+    position: absolute;
+    top: 25px;
+    left: 0;
+    background-color: #E5B300;
+    color: #F5F5F5;
+    padding: 10px 40px;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* Paragraph Text Styling */
+.content-text {
+    font-size: 24px;
+    line-height: 1.8;
+    color: #000;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* Yellow Highlights */
+.accent {
+    color: #E5B300;
+}

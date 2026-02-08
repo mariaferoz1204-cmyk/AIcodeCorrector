@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About - AI Code Debugger</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/aboutstyle.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-left">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo-image">
+      <h1 class="site-title">AI Code Debugger</h1>
+    </div>
+    
+    <nav class="nav">
+      <ul class="nav-list">
+        <li><a href="{{ url_for('index') }}" class="nav-item">Home</a></li>
+        <li><a href="{{ url_for('debug_code') }}" class="nav-item">Debug Code</a></li>
+        <li><a href="#" class="nav-item active">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="main-wrapper">
+    <div class="circuit-bg">
+      <div class="description-card">
+        <div class="about-label">
+           About AI Code Debugger
+        </div>
+
+        <p class="content-text">
+          AI Code Debugger is an innovative web application that uses <span class="accent">artificial intelligence</span> to help developers identify and <span class="accent">fix coding errors</span> quickly. Users can paste their code, select the programming language, and the <span class="accent">AI analyzes the code</span> to detect syntax and logical mistakes. The tool also provides clear explanations and <span class="accent">suggestions,</span> making it easier for beginners and professionals to learn from their mistakes. With support for multiple languages such as <span class="accent">Python, JavaScript, and Java</span>, AI Code Debugger saves time, improves code quality, and enhances the coding experience. This project demonstrates the practical application of AI-driven development in real-world software engineering.
+        </p>
+      </div>
+    </div>
+  </main>
+
+</body>
+</html>
