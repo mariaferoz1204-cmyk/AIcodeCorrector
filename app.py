@@ -59,7 +59,8 @@ def login():
         password = request.form.get("password")
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, password):
-            # Added email to session as requested
+            # Storing ID is safer for database lookups than just the email
+            session["user_id"] = user.id
             session["user"] = user.username
             session["email"] = user.email 
             return redirect(url_for("home"))
@@ -81,19 +82,21 @@ def home():
 
 @app.route("/about")
 def about():
+    # Check session to ensure logged in users only, or remove if public
     if "user" not in session:
         return redirect(url_for("login"))
     return render_template("about.html")
 
 @app.route("/history")
 def view_history():
-    if "user" not in session:
+    if "user_id" not in session:
         return redirect(url_for("login"))
     
-    # Safer lookup using email from session
-    user = User.query.filter_by(email=session.get("email")).first()
+    # Use user_id for the most direct database lookup
+    user = User.query.get(session["user_id"])
     
     if not user:
+        session.clear() # Clear corrupt session
         return "User not found. Please log in again.", 404
         
     user_history = History.query.filter_by(user_id=user.id).order_by(History.timestamp.desc()).all()
@@ -103,14 +106,14 @@ def view_history():
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    if "user" not in session:
+    if "user_id" not in session:
         return jsonify({"status": "error", "message": "Unauthorized"}), 401
 
     data = request.get_json(silent=True)
     code = data.get("code", "")
     language = data.get("language", "Python")
     
-    user = User.query.filter_by(email=session.get("email")).first()
+    user_id = session["user_id"]
 
     status = "success"
     message = "No syntax errors found!"
@@ -138,7 +141,7 @@ def analyze():
         code_content=code,
         result=message,
         language=language,
-        user_id=user.id
+        user_id=user_id
     )
     db.session.add(new_entry)
     db.session.commit()
