@@ -93,6 +93,7 @@ def view_history():
     if not user:
         session.clear()
         return redirect(url_for("login"))
+    # Fetch user history sorted by newest first
     user_history = History.query.filter_by(user_id=user.id).order_by(History.timestamp.desc()).all()
     return render_template("history.html", history=user_history, user=session.get("user"))
 
@@ -115,26 +116,27 @@ def analyze():
             compile(code, "<string>", "exec")
         except SyntaxError as e:
             status = "error"
-            message = f"Python Error: '{e.msg}' on line {e.lineno}. Hint: Check for missing colons (:), unclosed brackets, or incorrect indentation."
+            message = f"Python Error: '{e.msg}' on line {e.lineno}. Hint: Check colons (:) or indentation."
     
     elif language == "Java":
         stripped_code = code.strip()
         if not (stripped_code.endswith(";") or stripped_code.endswith("}")):
             status = "error"
-            message = "Java Error: Missing Semicolon (;). Every Java statement must end with a semicolon."
+            message = "Java Error: Missing Semicolon (;)."
         elif code.count("{") != code.count("}"):
             status = "error"
-            message = f"Java Error: Mismatched Curly Braces. You have {code.count('{')} opening vs {code.count('}')} closing."
+            message = f"Java Error: Mismatched Curly Braces."
 
     elif language == "C++":
         stripped_code = code.strip()
         if code.count("{") != code.count("}"):
             status = "error"
-            message = "C++ Error: Mismatched Curly Braces. Check your main function or if/else blocks."
+            message = "C++ Error: Mismatched Curly Braces."
         elif not (stripped_code.endswith(";") or stripped_code.endswith("}")):
             status = "error"
-            message = "C++ Error: Missing Semicolon. C++ requires a ';' to terminate statements."
+            message = "C++ Error: Missing Semicolon."
 
+    # Save results to the database
     new_entry = History(code_content=code, result=message, language=language, user_id=session["user_id"])
     db.session.add(new_entry)
     db.session.commit()

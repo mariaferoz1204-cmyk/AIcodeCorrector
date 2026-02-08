@@ -2,28 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Code Debugger - Home</title>
+  <title>AI Code Debugger</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/homestyle.css') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-
   <header class="header">
     <div class="header-left">
       <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo-image">
       <h1 class="site-title">AI Code Debugger</h1>
     </div>
-    
     <nav class="nav">
       <ul class="nav-left">
-        <li class="nav-item"><a href="{{ url_for('home') }}" class="active">Home</a></li>
-        <li class="nav-item"><a href="{{ url_for('view_history') }}">My History</a></li>
-        <li class="nav-item"><a href="{{ url_for('about') }}">About</a></li>
+        <li><a href="{{ url_for('home') }}" class="nav-link active">Home</a></li>
+        <li><a href="{{ url_for('view_history') }}" class="nav-link">History</a></li>
       </ul>
       <div class="nav-right">
-        <span class="user-greeting">Hi, <strong>{{ user }}</strong></span>
-        <a href="{{ url_for('logout') }}" class="signup">LOGOUT</a>
+        <span>Hi, <strong>{{ user }}</strong></span>
+        <a href="{{ url_for('logout') }}" class="logout-btn">LOGOUT</a>
       </div>
     </nav>
   </header>
@@ -31,19 +27,14 @@
   <section class="hero">
     <div class="hero-overlay">
       <h2>Welcome back, <span class="highlight">{{ user }}</span></h2>
-      <p>Select your language and paste your code snippet below.</p>
-      
       <div class="debug-container">
           <select id="languageSelect" class="lang-dropdown">
               <option value="Python">Python</option>
               <option value="Java">Java</option>
               <option value="C++">C++</option>
           </select>
-
           <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
-          
           <button class="start-debugging" onclick="runAnalysis()">Start Debugging</button>
-          
           <div id="resultDisplay" class="result-box" style="display: none;">
               <h3 id="resultStatus"></h3>
               <p id="resultMessage"></p>
@@ -56,37 +47,18 @@
     async function runAnalysis() {
         const code = document.getElementById('codeInput').value;
         const language = document.getElementById('languageSelect').value;
-        const resultDisplay = document.getElementById('resultDisplay');
-        const resultStatus = document.getElementById('resultStatus');
-        const resultMessage = document.getElementById('resultMessage');
-
-        if (!code.trim()) {
-            alert("Please paste some code first!");
-            return;
-        }
-
-        try {
-            const response = await fetch('/analyze', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ code: code, language: language })
-            });
-            const result = await response.json();
-
-            resultDisplay.style.display = 'block';
-            resultStatus.innerText = result.status.toUpperCase();
-            resultMessage.innerText = result.message;
-
-            if (result.status === "success") {
-                resultDisplay.style.borderColor = "#28a745";
-                resultDisplay.style.backgroundColor = "rgba(40, 167, 69, 0.2)";
-            } else {
-                resultDisplay.style.borderColor = "#dc3545";
-                resultDisplay.style.backgroundColor = "rgba(220, 53, 69, 0.2)";
-            }
-        } catch (error) {
-            alert("Server error.");
-        }
+        const resDiv = document.getElementById('resultDisplay');
+        
+        const response = await fetch('/analyze', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ code: code, language: language })
+        });
+        const result = await response.json();
+        resDiv.style.display = 'block';
+        document.getElementById('resultStatus').innerText = result.status.toUpperCase();
+        document.getElementById('resultMessage').innerText = result.message;
+        resDiv.className = result.status === 'success' ? 'result-box success' : 'result-box error';
     }
   </script>
 </body>
