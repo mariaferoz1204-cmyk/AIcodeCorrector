@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - AI Code Corrector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/loginstyle.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="login-card">
+            <div class="form-container">
+                <h2>Get Started Now</h2>
+                <p class="subtitle">Create your account to start analyzing code</p>
+
+                <form action="/signup" method="POST">
+                    <div class="input-field">
+                        <label>Name</label>
+                        <input type="text" name="username" placeholder="Enter your name" required>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Email address</label>
+                        <input type="email" name="email" placeholder="Enter your email" required>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Password</label>
+                        <input type="password" name="password" placeholder="Create a password" required>
+                    </div>
+
+                    <div class="remember-row">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">I agree to the <u>terms & policy</u></label>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Signup</button>
+                </form>
+
+                <div class="separator">Or</div>
+
+                <div class="social-grid">
+                    <a href="/login/google" class="social-item">
+                        <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18">
+                        Sign in with Google
+                    </a>
+                    <a href="/login/apple" class="social-item">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" width="18">
+                        Sign in with Apple
+                    </a>
+                </div>
+
+                <p class="footer-text">Have an account? <a href="/login">Sign In</a></p>
+            </div>
+
+            <div class="visual-container">
+                <div class="robot-circle">
+                    <div class="bot-icon">🤖</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
