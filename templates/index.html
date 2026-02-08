@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Code Debugger</title>
+  <title>AI Code Debugger - Home</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/homestyle.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -16,68 +17,86 @@
     
     <nav class="nav">
       <ul class="nav-left">
-        <ul class="nav-list">
-    <li><a href="{{ url_for('home') }}" class="nav-item">Home</a></li>
-    <li><a href="{{ url_for('view_history') }}" class="nav-item">My History</a></li>
-    <li><a href="#" class="nav-item active">About</a></li>
-  </ul>
+        <li class="nav-item"><a href="{{ url_for('home') }}" class="active">Home</a></li>
+        <li class="nav-item"><a href="{{ url_for('view_history') }}">My History</a></li>
+        <li class="nav-item"><a href="{{ url_for('about') }}">About</a></li>
       </ul>
       <div class="nav-right">
-        <span class="user-greeting">Hi, {{ user }}</span>
-        <a href="{{ url_for('logout') }}" class="signup" style="text-decoration: none; text-align: center;">LOGOUT</a>
+        <span class="user-greeting">Hi, <strong>{{ user }}</strong></span>
+        <a href="{{ url_for('logout') }}" class="signup">LOGOUT</a>
       </div>
     </nav>
   </header>
 
   <section class="hero">
-  <div class="hero-overlay">
-    <h2>Welcome back, <span class="highlight">{{ user }}</span></h2>
-    <p>Ready to fix some code? Select a language and paste your snippet.</p>
-    
-    <div class="debug-container" style="margin-top: 20px;">
-        <select id="languageSelect" style="padding: 10px; border-radius: 5px; margin-bottom: 10px; width: 80%;">
-            <option value="Python">Python</option>
-            <option value="Java">Java</option>
-            <option value="C++">C++</option>
-        </select>
-        <br>
-        <textarea id="codeInput" placeholder="Paste code here..." style="width: 80%; height: 150px; border-radius: 10px; padding: 10px;"></textarea>
-        <br>
-        <button class="start-debugging" onclick="runAnalysis()">Start Debugging</button>
-        
-        <div id="resultBox" style="display: none; margin-top: 20px; padding: 15px; border-radius: 10px; width: 80%; margin-left: auto; margin-right: auto;">
-            <p id="resultText" style="font-weight: 600;"></p>
-        </div>
-    </div>
-  </div>
-</section>
-
-<script>
-  async function runAnalysis() {
-      const code = document.getElementById('codeInput').value;
-      const lang = document.getElementById('languageSelect').value; // Get selected language
-      const resultBox = document.getElementById('resultBox');
-      const resultText = document.getElementById('resultText');
-
-      const response = await fetch('/analyze', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ code: code, language: lang })
-      });
+    <div class="hero-overlay">
+      <h2>Welcome back, <span class="highlight">{{ user }}</span></h2>
+      <p>Select your language and paste your code snippet below to begin debugging.</p>
       
-      const result = await response.json();
+      <div class="debug-container">
+          <select id="languageSelect" class="lang-dropdown">
+              <option value="Python">Python</option>
+              <option value="Java">Java</option>
+              <option value="C++">C++</option>
+          </select>
 
-      // Show the result on the page instead of an alert
-      resultBox.style.display = 'block';
-      resultText.innerText = result.status.toUpperCase() + ": " + result.message;
+          <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
+          
+          <br>
+          <button class="start-debugging" onclick="runAnalysis()">Start Debugging</button>
+          
+          <div id="resultDisplay" class="result-box" style="display: none;">
+              <h3 id="resultStatus"></h3>
+              <p id="resultMessage"></p>
+          </div>
+      </div>
+    </div>
+  </section>
 
-      // Color coding: Green for success, Red for error
-      if (result.status === "success") {
-          resultBox.style.backgroundColor = "#d4edda";
-          resultBox.style.color = "#155724";
-      } else {
-          resultBox.style.backgroundColor = "#f8d7da";
-          resultBox.style.color = "#721c24";
-      }
-  }
-</script>
+  <script>
+    async function runAnalysis() {
+        const code = document.getElementById('codeInput').value;
+        const language = document.getElementById('languageSelect').value;
+        const resultDisplay = document.getElementById('resultDisplay');
+        const resultStatus = document.getElementById('resultStatus');
+        const resultMessage = document.getElementById('resultMessage');
+
+        // Simple check to ensure code isn't empty
+        if (!code.trim()) {
+            alert("Please paste some code first!");
+            return;
+        }
+
+        try {
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ code: code, language: language })
+            });
+            
+            const result = await response.json();
+
+            // Display the result box
+            resultDisplay.style.display = 'block';
+            resultStatus.innerText = result.status.toUpperCase();
+            resultMessage.innerText = result.message;
+
+            // Apply colors based on success or error
+            if (result.status === "success") {
+                resultDisplay.style.borderColor = "#28a745";
+                resultDisplay.style.backgroundColor = "rgba(40, 167, 69, 0.1)";
+                resultStatus.style.color = "#28a745";
+            } else {
+                resultDisplay.style.borderColor = "#dc3545";
+                resultDisplay.style.backgroundColor = "rgba(220, 53, 69, 0.1)";
+                resultStatus.style.color = "#dc3545";
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Server error. Please try again later.");
+        }
+    }
+  </script>
+
+</body>
+</html>

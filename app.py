@@ -8,8 +8,8 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# Session Security - Hardcoded for consistency on Railway
-app.secret_key = "ai_debugger_secure_key_2024_v2"
+# Session Security
+app.secret_key = "ai_debugger_secure_key_2024_final"
 
 # --- DATABASE CONFIGURATION ---
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -27,7 +27,7 @@ class User(db.Model):
 class History(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code_content = db.Column(db.Text, nullable=False)
-    result = db.Column(db.String(200))
+    result = db.Column(db.String(500)) # Increased length for detailed explanations
     language = db.Column(db.String(50))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -43,10 +43,8 @@ def signup():
         username = request.form.get("username")
         email = request.form.get("email")
         password = request.form.get("password")
-        
         if User.query.filter_by(email=email).first():
             return "Email already registered.", 400
-            
         hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
         new_user = User(username=username, email=email, password=hashed_pw)
         db.session.add(new_user)
@@ -60,7 +58,6 @@ def login():
         email = request.form.get("email")
         password = request.form.get("password")
         user = User.query.filter_by(email=email).first()
-        
         if user and check_password_hash(user.password, password):
             session.clear() 
             session["user_id"] = user.id
@@ -92,14 +89,11 @@ def about():
 def view_history():
     if "user_id" not in session:
         return redirect(url_for("login"))
-    
     user = User.query.get(session["user_id"])
     if not user:
         session.clear()
         return redirect(url_for("login"))
-        
     user_history = History.query.filter_by(user_id=user.id).order_by(History.timestamp.desc()).all()
-    # Pass 'user' to ensure the navbar doesn't break
     return render_template("history.html", history=user_history, user=session.get("user"))
 
 # --- ANALYZER LOGIC ---
@@ -114,30 +108,43 @@ def analyze():
     language = data.get("language", "Python")
     
     status = "success"
-    message = "No syntax errors found!"
+    message = "No syntax errors found! Your code structure looks correct."
 
-    # --- Language Specific Logic ---
+    # --- PYTHON LOGIC ---
     if language == "Python":
         try:
             compile(code, "<string>", "exec")
         except SyntaxError as e:
             status = "error"
-            message = f"Python Syntax Error: {str(e)}"
+            message = f"Python Error: '{e.msg}' on line {e.lineno}. Hint: Check for missing colons (:), unclosed brackets, or incorrect indentation."
     
-    elif language in ["Java", "C++"]:
+    # --- JAVA LOGIC ---
+    elif language == "Java":
         stripped_code = code.strip()
-        # Common check for missing semicolons or mismatched braces
         if not (stripped_code.endswith(";") or stripped_code.endswith("}")):
             status = "error"
-            message = f"{language} Error: Possible missing semicolon ';' at the end of the statement."
+            message = "Java Error: Missing Semicolon (;). Every Java statement must end with a semicolon to indicate the end of the instruction."
         elif code.count("{") != code.count("}"):
             status = "error"
-            message = f"{language} Error: Mismatched curly braces {{ }}."
-        elif code.count("(") != code.count(")"):
+            message = f"Java Error: Mismatched Curly Braces. You have {code.count('{')} opening vs {code.count('}')} closing. Ensure every block is closed."
+        elif "System.out.println" in code and ";" not in code:
             status = "error"
-            message = f"{language} Error: Mismatched parentheses ( )."
+            message = "Java Error: Your print statement is incomplete. Don't forget the ';' at the end!"
 
-    # Save to history database
+    # --- C++ LOGIC ---
+    elif language == "C++":
+        stripped_code = code.strip()
+        if code.count("{") != code.count("}"):
+            status = "error"
+            message = "C++ Error: Mismatched Curly Braces. Check your main function or if/else blocks to ensure all sets of '{}' match."
+        elif "cout" in code and "<<" not in code:
+            status = "error"
+            message = "C++ Error: 'cout' requires insertion operators (<<). Correct usage: cout << 'Hello';"
+        elif not (stripped_code.endswith(";") or stripped_code.endswith("}")):
+            status = "error"
+            message = "C++ Error: Missing Semicolon. C++ requires a ';' to terminate most expressions and statements."
+
+    # Save to history
     new_entry = History(
         code_content=code,
         result=message,
@@ -150,5 +157,4 @@ def analyze():
     return jsonify({"status": status, "message": message})
 
 if __name__ == "__main__":
-    # Using port 3000 to match your previous setup
     app.run(host="0.0.0.0", port=3000, debug=True)
