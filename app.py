@@ -8,8 +8,8 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# Session Security - Hardcoded for stability on Railway
-app.secret_key = "ai_debugger_secure_key_2024"
+# Session Security - Hardcoded for consistency on Railway
+app.secret_key = "ai_debugger_secure_key_2024_v2"
 
 # --- DATABASE CONFIGURATION ---
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -62,7 +62,7 @@ def login():
         user = User.query.filter_by(email=email).first()
         
         if user and check_password_hash(user.password, password):
-            session.clear() # Clear any old/broken sessions
+            session.clear() 
             session["user_id"] = user.id
             session["user"] = user.username
             return redirect(url_for("home"))
@@ -84,7 +84,6 @@ def home():
 
 @app.route("/about")
 def about():
-    # Adding a session check so users must be logged in to see about
     if "user_id" not in session:
         return redirect(url_for("login"))
     return render_template("about.html", user=session.get("user"))
@@ -100,7 +99,8 @@ def view_history():
         return redirect(url_for("login"))
         
     user_history = History.query.filter_by(user_id=user.id).order_by(History.timestamp.desc()).all()
-    return render_template("history.html", history=user_history, user=user.username)
+    # Pass 'user' to ensure the navbar doesn't break
+    return render_template("history.html", history=user_history, user=session.get("user"))
 
 # --- ANALYZER LOGIC ---
 
@@ -116,7 +116,7 @@ def analyze():
     status = "success"
     message = "No syntax errors found!"
 
-    # Basic Logic Check
+    # --- Language Specific Logic ---
     if language == "Python":
         try:
             compile(code, "<string>", "exec")
@@ -124,7 +124,20 @@ def analyze():
             status = "error"
             message = f"Python Syntax Error: {str(e)}"
     
-    # Save to history
+    elif language in ["Java", "C++"]:
+        stripped_code = code.strip()
+        # Common check for missing semicolons or mismatched braces
+        if not (stripped_code.endswith(";") or stripped_code.endswith("}")):
+            status = "error"
+            message = f"{language} Error: Possible missing semicolon ';' at the end of the statement."
+        elif code.count("{") != code.count("}"):
+            status = "error"
+            message = f"{language} Error: Mismatched curly braces {{ }}."
+        elif code.count("(") != code.count(")"):
+            status = "error"
+            message = f"{language} Error: Mismatched parentheses ( )."
+
+    # Save to history database
     new_entry = History(
         code_content=code,
         result=message,
@@ -137,4 +150,5 @@ def analyze():
     return jsonify({"status": status, "message": message})
 
 if __name__ == "__main__":
+    # Using port 3000 to match your previous setup
     app.run(host="0.0.0.0", port=3000, debug=True)
