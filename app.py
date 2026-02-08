@@ -27,7 +27,7 @@ class User(db.Model):
 class History(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code_content = db.Column(db.Text, nullable=False)
-    result = db.Column(db.String(500)) # Increased length for detailed explanations
+    result = db.Column(db.String(500)) 
     language = db.Column(db.String(50))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -110,7 +110,6 @@ def analyze():
     status = "success"
     message = "No syntax errors found! Your code structure looks correct."
 
-    # --- PYTHON LOGIC ---
     if language == "Python":
         try:
             compile(code, "<string>", "exec")
@@ -118,39 +117,25 @@ def analyze():
             status = "error"
             message = f"Python Error: '{e.msg}' on line {e.lineno}. Hint: Check for missing colons (:), unclosed brackets, or incorrect indentation."
     
-    # --- JAVA LOGIC ---
     elif language == "Java":
         stripped_code = code.strip()
         if not (stripped_code.endswith(";") or stripped_code.endswith("}")):
             status = "error"
-            message = "Java Error: Missing Semicolon (;). Every Java statement must end with a semicolon to indicate the end of the instruction."
+            message = "Java Error: Missing Semicolon (;). Every Java statement must end with a semicolon."
         elif code.count("{") != code.count("}"):
             status = "error"
-            message = f"Java Error: Mismatched Curly Braces. You have {code.count('{')} opening vs {code.count('}')} closing. Ensure every block is closed."
-        elif "System.out.println" in code and ";" not in code:
-            status = "error"
-            message = "Java Error: Your print statement is incomplete. Don't forget the ';' at the end!"
+            message = f"Java Error: Mismatched Curly Braces. You have {code.count('{')} opening vs {code.count('}')} closing."
 
-    # --- C++ LOGIC ---
     elif language == "C++":
         stripped_code = code.strip()
         if code.count("{") != code.count("}"):
             status = "error"
-            message = "C++ Error: Mismatched Curly Braces. Check your main function or if/else blocks to ensure all sets of '{}' match."
-        elif "cout" in code and "<<" not in code:
-            status = "error"
-            message = "C++ Error: 'cout' requires insertion operators (<<). Correct usage: cout << 'Hello';"
+            message = "C++ Error: Mismatched Curly Braces. Check your main function or if/else blocks."
         elif not (stripped_code.endswith(";") or stripped_code.endswith("}")):
             status = "error"
-            message = "C++ Error: Missing Semicolon. C++ requires a ';' to terminate most expressions and statements."
+            message = "C++ Error: Missing Semicolon. C++ requires a ';' to terminate statements."
 
-    # Save to history
-    new_entry = History(
-        code_content=code,
-        result=message,
-        language=language,
-        user_id=session["user_id"]
-    )
+    new_entry = History(code_content=code, result=message, language=language, user_id=session["user_id"])
     db.session.add(new_entry)
     db.session.commit()
 

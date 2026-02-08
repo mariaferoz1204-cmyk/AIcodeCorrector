@@ -31,7 +31,7 @@
   <section class="hero">
     <div class="hero-overlay">
       <h2>Welcome back, <span class="highlight">{{ user }}</span></h2>
-      <p>Select your language and paste your code snippet below to begin debugging.</p>
+      <p>Select your language and paste your code snippet below.</p>
       
       <div class="debug-container">
           <select id="languageSelect" class="lang-dropdown">
@@ -42,7 +42,6 @@
 
           <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
           
-          <br>
           <button class="start-debugging" onclick="runAnalysis()">Start Debugging</button>
           
           <div id="resultDisplay" class="result-box" style="display: none;">
@@ -61,7 +60,6 @@
         const resultStatus = document.getElementById('resultStatus');
         const resultMessage = document.getElementById('resultMessage');
 
-        // Simple check to ensure code isn't empty
         if (!code.trim()) {
             alert("Please paste some code first!");
             return;
@@ -73,30 +71,23 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ code: code, language: language })
             });
-            
             const result = await response.json();
 
-            // Display the result box
             resultDisplay.style.display = 'block';
             resultStatus.innerText = result.status.toUpperCase();
             resultMessage.innerText = result.message;
 
-            // Apply colors based on success or error
             if (result.status === "success") {
                 resultDisplay.style.borderColor = "#28a745";
-                resultDisplay.style.backgroundColor = "rgba(40, 167, 69, 0.1)";
-                resultStatus.style.color = "#28a745";
+                resultDisplay.style.backgroundColor = "rgba(40, 167, 69, 0.2)";
             } else {
                 resultDisplay.style.borderColor = "#dc3545";
-                resultDisplay.style.backgroundColor = "rgba(220, 53, 69, 0.1)";
-                resultStatus.style.color = "#dc3545";
+                resultDisplay.style.backgroundColor = "rgba(220, 53, 69, 0.2)";
             }
         } catch (error) {
-            console.error("Error:", error);
-            alert("Server error. Please try again later.");
+            alert("Server error.");
         }
     }
   </script>
-
 </body>
 </html>

@@ -1,12 +1,6 @@
 /* Reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
-/* HEADER */
 .header {
   display: flex;
   align-items: center;
@@ -14,109 +8,41 @@
   padding: 20px 50px;
   max-width: 1440px;
   margin: auto;
-  background-color: #fff; /* Ensures header background is clean */
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
+.logo-image { width: 83px; height: 83px; }
+.site-title { font-size: 28px; font-weight: 600; color: #222; }
 
-/* Logo */
-.logo-image {
-  width: 83px;
-  height: 83px;
-  object-fit: contain;
-}
+.nav { display: flex; align-items: center; gap: 30px; }
+.nav-left { display: flex; gap: 10px; list-style: none; }
 
-/* Site title */
-.site-title {
-  font-size: 28px; /* Slightly reduced for better fit */
-  font-weight: 600;
-  color: #222;
-}
-
-/* NAVIGATION AREA */
-.nav {
-  display: flex;
-  align-items: center;
-  gap: 30px;
-}
-
-/* Links Container */
-.nav-left {
-  display: flex;
-  gap: 10px; /* Space between the buttons */
-  list-style: none;
-}
-
-/* Individual Button Styling */
 .nav-item a {
   text-decoration: none;
   font-size: 15px;
-  font-weight: 500;
   color: #36384E;
   padding: 10px 18px;
   border-radius: 6px;
-  transition: all 0.3s ease;
-  display: inline-block;
+  transition: 0.3s;
 }
 
-/* Hover Effect */
-.nav-item a:hover {
-  background-color: #f1f1f1;
-  color: #E5B300;
-  transform: translateY(-2px); /* Slight lift effect */
-}
+.nav-item a:hover { background-color: #f1f1f1; color: #E5B300; }
+.nav-item .active { background-color: #222; color: #E5B300 !important; }
 
-/* Active State - For the Home Page */
-.nav-item .active {
-  background-color: #222;
-  color: #E5B300 !important;
-  font-weight: 600;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.user-greeting {
-  font-size: 14px;
-  color: #666;
-}
-
-/* LOGOUT BUTTON */
 .signup {
   padding: 10px 22px;
   background-color: #E5B300;
-  border: none;
   color: #fff;
-  font-size: 15px;
   font-weight: 600;
-  cursor: pointer;
   border-radius: 6px;
   text-decoration: none;
-  transition: 0.3s;
-  display: inline-block;
 }
 
-.signup:hover {
-  background-color: #222;
-  color: #E5B300;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-
-/* HERO SECTION */
+/* HERO & DEBUGGER FIX */
 .hero {
   width: 100%;
-  height: 600px;
-  background-image: url('{{ url_for("static", filename="images/background.png") }}');
+  height: 750px;
+  background-image: url('../images/background.png');
   background-size: cover;
-  background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -125,62 +51,50 @@
 .hero-overlay {
   text-align: center;
   color: white;
-  background-color: rgba(0,0,0,0.6); /* Slightly darker for better text contrast */
-  padding: 50px;
+  background-color: rgba(0,0,0,0.7);
+  padding: 40px;
   border-radius: 15px;
-  max-width: 850px;
-  backdrop-filter: blur(5px); /* Adds a modern glassy feel */
+  width: 90%;
+  max-width: 700px;
 }
 
-.hero-overlay h2 {
-  font-size: 48px;
-  margin-bottom: 20px;
+.debug-container {
+  display: flex;
+  flex-direction: column; /* This stacks dropdown, textarea, and button */
+  align-items: center;
+  gap: 15px;
+  margin-top: 25px;
 }
 
-.hero-overlay .highlight {
-  background-color: #E5B300;
-  padding: 0 10px;
-  color: #222;
-  border-radius: 4px;
+.lang-dropdown {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 2px solid #E5B300;
 }
 
-.hero-overlay p {
-  font-size: 18px;
-  margin-bottom: 30px;
+#codeInput {
+  width: 100%;
+  height: 200px;
+  border-radius: 10px;
+  padding: 15px;
+  font-family: monospace;
 }
 
-/* DEBUGGING BUTTON */
 .start-debugging {
-  padding: 15px 40px;
-  background-color: #E5B300; /* Matching logo color */
-  color: #222;
+  width: 100%;
+  padding: 15px;
+  background-color: #E5B300;
   border: none;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
   border-radius: 8px;
-  transition: 0.3s;
+  font-weight: bold;
+  cursor: pointer;
 }
 
-.start-debugging:hover {
-  background-color: #fff;
-  transform: scale(1.05);
-}
-
-/* RESPONSIVE */
-@media (max-width: 1024px) {
-  .header {
-    flex-direction: column;
-    padding: 20px;
-  }
-
-  .nav {
-    margin-top: 20px;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .hero-overlay h2 {
-    font-size: 36px;
-  }
+.result-box {
+  width: 100%;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid;
+  margin-top: 15px;
 }
