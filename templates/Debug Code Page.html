@@ -4,28 +4,43 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Code Debugging Website</title>
-  <link rel="stylesheet" href="Debug Code Page.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Debug Code Page.css') }}">
+  <style>
+    /* Add a smooth entry for suggestions */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .suggestions-section {
+      animation: fadeIn 0.8s ease-in;
+    }
+    /* Nav link styles */
+    .nav-item a { text-decoration: none; color: inherit; }
+  </style>
 </head>
 
 <body>
 
-<!-- HEADER / NAVBAR -->
 <header class="header">
   <div class="logo-container">
-    <img src="logo.png" alt="Logo" class="logo-image">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo-image">
     <h1 class="site-title">AI Code Debugging Website</h1>
   </div>
 
   <nav class="nav">
     <ul class="nav-left">
-      <li class="nav-item">Home</li>
-      <li class="nav-item nav-item-bold">Debug Code</li>
-      <li class="nav-item">About</li>
+      <li class="nav-item"><a href="{{ url_for('home') }}">Home</a></li>
+      <li class="nav-item nav-item-bold"><a href="{{ url_for('home') }}">Debug Code</a></li>
+      <li class="nav-item"><a href="{{ url_for('about') }}">About</a></li>
+      <li class="nav-item"><a href="{{ url_for('view_history') }}">History</a></li>
     </ul>
+    <div class="nav-right" style="margin-left: 20px;">
+        <span>User: <strong>{{ user }}</strong></span>
+        <a href="{{ url_for('logout') }}" style="margin-left:15px; color:red; text-decoration:none;">Logout</a>
+    </div>
   </nav>
 </header>
 
-<!-- DEBUG SECTION WITH BACKGROUND IMAGE -->
 <section class="debug-section">
   <div class="debug-box">
     <h2>Paste your code here:</h2>
@@ -34,9 +49,9 @@
 
     <div class="controls">
       <select id="language">
-        <option>Python</option>
-        <option>Java</option>
-        <option>C++</option>
+        <option value="Python">Python</option>
+        <option value="Java">Java</option>
+        <option value="C++">C++</option>
       </select>
 
       <button onclick="getSuggestions()">Get Suggestions</button>
@@ -44,12 +59,40 @@
   </div>
 </section>
 
-<!-- AI SUGGESTIONS OUTPUT -->
-<section class="suggestions-section" id="suggestionsBox">
+<section class="suggestions-section" id="suggestionsBox" style="display:none; width: 60%; margin: 30px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
   <h3>AI Suggestions</h3>
+  <hr>
   <p class="error-text" id="errorText"></p>
 </section>
 
-<script src="debug.js"></script>
+<script>
+async function getSuggestions() {
+    const code = document.getElementById("codeInput").value;
+    const lang = document.getElementById("language").value;
+    const box = document.getElementById("suggestionsBox");
+    const text = document.getElementById("errorText");
+
+    if(!code.trim()) {
+        alert("Please paste some code first!");
+        return;
+    }
+
+    const response = await fetch('/analyze', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ code: code, language: lang })
+    });
+
+    const result = await response.json();
+    
+    // Show results
+    box.style.display = "block";
+    text.innerText = result.message;
+    text.style.color = result.status === "success" ? "green" : "red";
+
+    // --- SMOOTH SCROLL ---
+    box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
 </body>
 </html>

@@ -8,6 +8,7 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+# Session Security
 app.secret_key = os.environ.get("SECRET_KEY", "ai_corrector_dev_key_123")
 
 # --- DATABASE CONFIGURATION ---
@@ -15,13 +16,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# --- DATABASE MODELS ---
+# --- DATABASE MODELS (Existing Context Kept) ---
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    # Link to history
     history = db.relationship('History', backref='owner', lazy=True)
 
 class History(db.Model):
@@ -43,10 +43,8 @@ def signup():
         username = request.form.get("username")
         email = request.form.get("email")
         password = request.form.get("password")
-        
         if User.query.filter_by(email=email).first():
             return "Email already registered.", 400
-
         hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
         new_user = User(username=username, email=email, password=hashed_pw)
         db.session.add(new_user)
@@ -72,13 +70,20 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
-# --- CODE ANALYZER & HISTORY ROUTES ---
+# --- UPDATED CODE ANALYZER (Supports Python, Java, C++) ---
 
 @app.route("/", methods=["GET"])
 def home():
     if "user" not in session:
         return redirect(url_for("login"))
     return render_template("index.html", user=session["user"])
+
+# ADDED ABOUT ROUTE
+@app.route("/about")
+def about():
+    if "user" not in session:
+        return redirect(url_for("login"))
+    return render_template("about.html")
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -88,24 +93,34 @@ def analyze():
     data = request.get_json(silent=True)
     code = data.get("code", "")
     language = data.get("language", "Python")
-
-    # Get current user
     user = User.query.filter_by(username=session["user"]).first()
 
-    # Simple Python Logic
     status = "success"
-    message = "No syntax errors"
+    message = "No syntax errors found!"
+
+    # --- MULTI-LANGUAGE LOGIC ---
     if language == "Python":
         try:
             compile(code, "<string>", "exec")
         except SyntaxError as e:
             status = "error"
-            message = str(e)
-    else:
-        status = "error"
-        message = f"{language} is not supported yet."
+            message = f"Python Syntax Error: {str(e)}"
+    
+    elif language == "Java" or language == "C++":
+        # Check for missing semicolons (basic syntax check)
+        stripped_code = code.strip()
+        if not stripped_code.endswith(";") and not stripped_code.endswith("}"):
+            status = "error"
+            message = f"{language} Error: Possible missing semicolon ';' at the end of the statement."
+        # Check for bracket balance
+        elif code.count("{") != code.count("}"):
+            status = "error"
+            message = f"{language} Error: Mismatched curly braces {{ }}."
+        elif code.count("(") != code.count(")"):
+            status = "error"
+            message = f"{language} Error: Mismatched parentheses ( )."
 
-    # SAVE TO DATABASE HISTORY
+    # SAVE TO HISTORY (Keep records for user)
     new_entry = History(
         code_content=code,
         result=message,
@@ -121,7 +136,6 @@ def analyze():
 def view_history():
     if "user" not in session:
         return redirect(url_for("login"))
-    
     user = User.query.filter_by(username=session["user"]).first()
     user_history = History.query.filter_by(user_id=user.id).order_by(History.timestamp.desc()).all()
     return render_template("history.html", history=user_history)
