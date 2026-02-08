@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My History - AI Code Debugger</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/historystyle.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="history-wrapper">
+        <div class="history-header">
+            <h1>My Debugging History</h1>
+            <a href="/" class="back-btn">← Back to Analyzer</a>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Language</th>
+                        <th>Code Snippet</th>
+                        <th>Analysis Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in history %}
+                    <tr>
+                        <td>{{ item.timestamp.strftime('%b %d, %H:%M') }}</td>
+                        <td><strong>{{ item.language }}</strong></td>
+                        <td><code class="code-preview">{{ item.code_content }}</code></td>
+                        <td>
+                            {% if "No syntax errors" in item.result %}
+                            <span class="badge status-success">Success</span>
+                            {% else %}
+                            <span class="badge status-error">Error Found</span>
+                            <br><small style="color:#721c24">{{ item.result }}</small>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
