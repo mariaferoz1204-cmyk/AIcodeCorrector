@@ -19,7 +19,8 @@
       <ul class="nav-links">
         <li><a href="{{ url_for('home') }}" class="nav-btn active">Home</a></li>
         <li><a href="{{ url_for('view_history') }}" class="nav-btn">History</a></li>
-        <li><a href="{{ url_for('about') }}" class="nav-btn">About</a></li> </ul>
+        <li><a href="{{ url_for('about') }}" class="nav-btn">About</a></li>
+      </ul>
       <div class="nav-right">
         <span class="user-greeting">Hi, <strong>{{ user }}</strong></span>
         <a href="{{ url_for('logout') }}" class="logout-link">LOGOUT</a>
@@ -69,11 +70,9 @@
                 body: JSON.stringify({ code: code, language: language })
             });
             const result = await response.json();
-
             resultDisplay.style.display = 'block';
             document.getElementById('resultStatus').innerText = result.status.toUpperCase();
             document.getElementById('resultMessage').innerText = result.message;
-
             resultDisplay.className = result.status === "success" ? "result-box success-theme" : "result-box error-theme";
         } catch (error) {
             alert("Connection error.");

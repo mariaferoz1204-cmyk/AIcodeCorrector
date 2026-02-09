@@ -111,33 +111,15 @@ def analyze():
     language = data.get("language", "Python")
     
     status = "success"
-    message = "No syntax errors found! Your code structure looks correct."
+    message = "No syntax errors found!"
 
     if language == "Python":
         try:
             compile(code, "<string>", "exec")
         except SyntaxError as e:
             status = "error"
-            message = f"Python Error: '{e.msg}' on line {e.lineno}. Hint: Check colons (:) or indentation."
+            message = f"Python Error: '{e.msg}' on line {e.lineno}."
     
-    elif language == "Java":
-        stripped_code = code.strip()
-        if not (stripped_code.endswith(";") or stripped_code.endswith("}")):
-            status = "error"
-            message = "Java Error: Missing Semicolon (;)."
-        elif code.count("{") != code.count("}"):
-            status = "error"
-            message = "Java Error: Mismatched Curly Braces."
-
-    elif language == "C++":
-        stripped_code = code.strip()
-        if code.count("{") != code.count("}"):
-            status = "error"
-            message = "C++ Error: Mismatched Curly Braces."
-        elif not (stripped_code.endswith(";") or stripped_code.endswith("}")):
-            status = "error"
-            message = "C++ Error: Missing Semicolon."
-
     # Save results to the database
     new_entry = History(code_content=code, result=message, language=language, user_id=session["user_id"])
     db.session.add(new_entry)
