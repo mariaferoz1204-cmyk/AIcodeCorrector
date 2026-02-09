@@ -3,31 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My History - AI Code Debugger</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/historystyle.css') }}">
+    <title>History - AI Code Debugger</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        .history-navbar {
-            background-color: #333;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-        }
-        .history-navbar a {
-            color: white;
-            text-decoration: none;
-            margin-left: 20px;
-            font-weight: 500;
-        }
-        .history-navbar a:hover {
-            color: #f4b400;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: #f8f9fa; }
+        
+        .history-navbar { background-color: #333; padding: 15px; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .history-navbar a { color: white; text-decoration: none; margin-left: 15px; font-size: 14px; }
+
+        .history-wrapper { max-width: 1100px; margin: 20px auto; padding: 15px; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .history-header h1 { font-size: 22px; }
+
+        .back-btn { text-decoration: none; color: #222; font-weight: 600; padding: 8px 15px; border-radius: 8px; background-color: #E5B300; font-size: 13px; }
+
+        /* Table Mobile Fix */
+        .table-container { background: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        thead { background-color: #222; color: #E5B300; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
+
+        .code-preview { font-family: monospace; background: #f1f1f1; padding: 4px 8px; border-radius: 4px; display: block; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; }
+        .status-success { background-color: #d4edda; color: #155724; }
+        .status-error { background-color: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
-
     <nav class="history-navbar">
         <div class="logo"><strong>AI Debugger</strong></div>
         <div class="links">
@@ -39,32 +42,31 @@
 
     <div class="history-wrapper">
         <div class="history-header">
-            <h1>My Debugging History</h1>
-            <a href="{{ url_for('home') }}" class="back-btn">← Back to Analyzer</a>
+            <h1>My History</h1>
+            <a href="{{ url_for('home') }}" class="back-btn">← New Debug</a>
         </div>
 
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>Date & Time</th>
-                        <th>Language</th>
-                        <th>Code Snippet</th>
-                        <th>Analysis Result</th>
+                        <th>Date</th>
+                        <th>Lang</th>
+                        <th>Code</th>
+                        <th>Result</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in history %}
                     <tr>
-                        <td>{{ item.timestamp.strftime('%b %d, %H:%M') }}</td>
-                        <td><strong>{{ item.language }}</strong></td>
+                        <td>{{ item.timestamp.strftime('%b %d') }}</td>
+                        <td>{{ item.language }}</td>
                         <td><code class="code-preview">{{ item.code_content }}</code></td>
                         <td>
                             {% if "No syntax errors" in item.result %}
-                            <span class="badge status-success">Success</span>
+                            <span class="badge status-success">OK</span>
                             {% else %}
-                            <span class="badge status-error">Error Found</span>
-                            <br><small style="color:#721c24">{{ item.result }}</small>
+                            <span class="badge status-error">ERR</span>
                             {% endif %}
                         </td>
                     </tr>

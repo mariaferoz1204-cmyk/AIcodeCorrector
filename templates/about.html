@@ -1,42 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About - AI Code Debugger</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/aboutstyle.css') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - AI Code Debugger</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #fff; }
+        .logo-image { width: 40px; }
+        .site-title { font-size: 20px; font-weight: 600; }
+        .nav-list { display: flex; list-style: none; gap: 15px; }
+        .nav-item { text-decoration: none; color: #555; font-size: 14px; }
+        .nav-item.active { font-weight: 800; color: #000; }
+
+        .circuit-bg { width: 100%; min-height: 80vh; background: #eee; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .description-card { width: 100%; max-width: 900px; background: white; padding: 60px 20px; border-radius: 15px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .about-label { position: absolute; top: 20px; left: 0; background: #E5B300; color: white; padding: 5px 20px; font-weight: 600; }
+        .content-text { font-size: 18px; line-height: 1.6; text-align: center; color: #333; }
+        .accent { color: #E5B300; font-weight: bold; }
+
+        @media (max-width: 600px) {
+            .header { flex-direction: column; text-align: center; gap: 10px; }
+            .content-text { font-size: 15px; }
+            .description-card { padding: 50px 15px; }
+        }
+    </style>
 </head>
 <body>
-
-  <header class="header">
-    <div class="header-left">
-      <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo-image">
-      <h1 class="site-title">AI Code Debugger</h1>
-    </div>
-    
-   <nav class="nav">
-  <ul class="nav-list">
-    <li><a href="{{ url_for('home') }}" class="nav-item">Home</a></li>
-    <li><a href="{{ url_for('view_history') }}" class="nav-item">My History</a></li>
-    <li><a href="#" class="nav-item active">About</a></li>
-  </ul>
-</nav>
-  </header>
-
-  <main class="main-wrapper">
-    <div class="circuit-bg">
-      <div class="description-card">
-        <div class="about-label">
-           About AI Code Debugger
+    <header class="header">
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo-image">
+            <h1 class="site-title">AI Code Debugger</h1>
         </div>
-
-        <p class="content-text">
-          AI Code Debugger is an innovative web application that uses <span class="accent">artificial intelligence</span> to help developers identify and <span class="accent">fix coding errors</span> quickly. Users can paste their code, select the programming language, and the <span class="accent">AI analyzes the code</span> to detect syntax and logical mistakes. The tool also provides clear explanations and <span class="accent">suggestions,</span> making it easier for beginners and professionals to learn from their mistakes. With support for multiple languages such as <span class="accent">Python, C++, and Java</span>, AI Code Debugger saves time, improves code quality, and enhances the coding experience. This project demonstrates the practical application of AI-driven development in real-world software engineering.
-        </p>
-      </div>
-    </div>
-  </main>
-
+        <nav><ul class="nav-list">
+            <li><a href="{{ url_for('home') }}" class="nav-item">Home</a></li>
+            <li><a href="{{ url_for('view_history') }}" class="nav-item">History</a></li>
+            <li><a href="#" class="nav-item active">About</a></li>
+        </ul></nav>
+    </header>
+    <main class="circuit-bg">
+        <div class="description-card">
+            <div class="about-label">About Us</div>
+            <p class="content-text">
+                AI Code Debugger helps developers <span class="accent">fix errors</span> quickly. 
+                Using AI to analyze <span class="accent">Python, C++, and Java</span>, we provide 
+                real-time suggestions to improve your code quality instantly.
+            </p>
+        </div>
+    </main>
 </body>
 </html>

@@ -8,117 +8,81 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: #f4f4f4; overflow-x: hidden; }
 
-        /* HEADER: Horizontal row, sticky at top */
+        /* HEADER: Fully Responsive */
         .header {
-            display: flex !important;
+            display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 40px;
+            padding: 10px 20px;
             background: #fff;
             border-bottom: 2px solid #E5B300;
             position: sticky;
             top: 0;
             z-index: 1000;
         }
-        .header-left { display: flex; align-items: center; gap: 12px; }
-        .site-title { font-size: 1.2rem; color: #333; }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .site-title { font-size: 1.1rem; color: #333; }
         
-        .nav-container { display: flex !important; align-items: center; gap: 20px; }
-        .nav-links { 
-            display: flex !important; 
-            list-style: none !important; 
-            gap: 15px; 
-        }
-        .nav-links a { text-decoration: none; color: #555; font-weight: 600; font-size: 0.9rem; }
-        .nav-links a:hover { color: #E5B300; }
-
+        .nav-container { display: flex; align-items: center; gap: 10px; }
+        .nav-links { display: flex; list-style: none; gap: 10px; }
+        .nav-links a { text-decoration: none; color: #555; font-weight: 600; font-size: 0.85rem; }
+        
         .logout-btn {
             background: #E5B300;
             color: white;
-            padding: 6px 14px;
+            padding: 5px 10px;
             border-radius: 4px;
             text-decoration: none;
             font-weight: bold;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
 
-        /* MAIN SECTION: Centered Panel */
+        /* Responsive Main Section */
         .hero {
-            padding: 40px 20px;
+            padding: 20px 15px;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
             min-height: calc(100vh - 70px);
         }
         .hero-panel {
             background: #444;
             color: white;
-            padding: 30px;
+            padding: 25px 15px;
             border-radius: 12px;
             width: 100%;
             max-width: 650px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         .highlight { background: #E5B300; color: black; padding: 0 6px; border-radius: 3px; }
 
-        /* VERTICAL STACK */
-        .debug-stack {
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 15px;
-            margin-top: 20px;
+        .debug-stack { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .styled-select, .styled-textarea, .debug-btn { width: 100%; border-radius: 6px; }
+        
+        .styled-select { padding: 10px; border: 2px solid #E5B300; }
+        .styled-textarea { 
+            height: 200px; padding: 15px; border: none; font-family: monospace; 
+            font-size: 14px; resize: vertical; color: #333; 
         }
-        .styled-select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 6px;
-            border: 2px solid #E5B300;
-        }
-        .styled-textarea {
-            width: 100%;
-            height: 200px;
-            padding: 15px;
-            border-radius: 8px;
-            border: none;
-            font-family: monospace;
-            font-size: 13px;
-            resize: vertical;
-            color: #333;
-        }
-        .debug-btn {
-            width: 100%;
-            padding: 12px;
-            background: #000;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+        .debug-btn { padding: 12px; background: #000; color: #fff; border: none; font-weight: bold; cursor: pointer; }
         .debug-btn:hover { background: #E5B300; color: #000; }
 
-        /* RESULT BOX STYLES */
-        #resultBox {
-            margin-top: 15px;
-            padding: 15px;
-            border-radius: 8px;
-            display: none; /* Hidden until debugging starts */
-            text-align: left;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            white-space: pre-wrap; /* Maintains error formatting */
-        }
+        #resultBox { margin-top: 15px; padding: 15px; border-radius: 8px; display: none; text-align: left; font-size: 0.9rem; white-space: pre-wrap; }
         .error-msg { background: #fee2e2; color: #b91c1c; border: 1px solid #f87171; }
         .success-msg { background: #dcfce7; color: #15803d; border: 1px solid #4ade80; }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .header { flex-direction: column; gap: 10px; padding: 15px; }
+            .site-title { font-size: 1rem; }
+            .hero-panel { padding: 20px 10px; }
+            .content-text { font-size: 18px !important; }
+        }
     </style>
 </head>
 <body>
-
     <header class="header">
         <div class="header-left">
-            <img src="{{ url_for('static', filename='logo.png') }}" width="35">
+            <img src="{{ url_for('static', filename='logo.png') }}" width="30">
             <h1 class="site-title">AI Code Debugger</h1>
         </div>
         <nav class="nav-container">
@@ -133,8 +97,8 @@
 
     <main class="hero">
         <div class="hero-panel">
-            <h3>Welcome back, <span class="highlight">{{ user }}</span></h3>
-            <p style="font-size: 0.9rem; margin-top: 5px; opacity: 0.9;">Select language and start debugging.</p>
+            <h3>Welcome, <span class="highlight">{{ user }}</span></h3>
+            <p style="font-size: 0.85rem; margin-top: 5px; opacity: 0.9;">Paste code below to start debugging.</p>
 
             <div class="debug-stack">
                 <select id="languageSelect" class="styled-select">
@@ -142,11 +106,8 @@
                     <option value="Java">Java</option>
                     <option value="C++">C++</option>
                 </select>
-
                 <textarea id="codeInput" class="styled-textarea" placeholder="Paste your code here..."></textarea>
-                
                 <button class="debug-btn" onclick="runAnalysis()">Start Debugging</button>
-
                 <div id="resultBox"></div>
             </div>
         </div>
@@ -157,38 +118,31 @@
             const code = document.getElementById('codeInput').value;
             const lang = document.getElementById('languageSelect').value;
             const resultBox = document.getElementById('resultBox');
-
             if(!code.trim()) {
                 resultBox.style.display = "block";
                 resultBox.className = "error-msg";
-                resultBox.innerHTML = "<strong>Notice:</strong> Please paste some code first!";
+                resultBox.innerHTML = "Please paste code first!";
                 return;
             }
-            
             try {
                 const response = await fetch('/analyze', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ code: code, language: lang })
                 });
-                
                 const data = await response.json();
-                
-                // Show result box
                 resultBox.style.display = "block";
-                
-                if (data.status === "success" && data.message === "No syntax errors found!") {
+                if (data.status === "success") {
                     resultBox.className = "success-msg";
-                    resultBox.innerHTML = "<strong>Success!</strong><br>" + data.message;
+                    resultBox.innerHTML = "<strong>Success:</strong> " + data.message;
                 } else {
                     resultBox.className = "error-msg";
-                    resultBox.innerHTML = "<strong>Debugger Found Issues:</strong><br>" + data.message;
+                    resultBox.innerHTML = "<strong>Issue Found:</strong> " + data.message;
                 }
-
             } catch (error) {
                 resultBox.style.display = "block";
                 resultBox.className = "error-msg";
-                resultBox.innerHTML = "<strong>Connection Error:</strong> Could not reach the server.";
+                resultBox.innerHTML = "Server Error.";
             }
         }
     </script>
