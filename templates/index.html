@@ -1,59 +1,83 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AI Code Debugger</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/homestyle.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Code Debugger - Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/homestyle.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header class="main-header">
-        <div class="logo-area">
-            <img src="{{ url_for('static', filename='logo.png') }}" width="50">
-            <h1>AI Code Debugger</h1>
-        </div>
-        
-        <nav class="navigation">
-            <ul class="nav-links-row">
-                <li><a href="{{ url_for('home') }}">Home</a></li>
-                <li><a href="{{ url_for('view_history') }}">History</a></li>
-                <li><a href="{{ url_for('about') }}">About</a></li>
-            </ul>
-            <div class="user-controls">
-                <span>Hi, <strong>{{ user }}</strong></span>
-                <a href="{{ url_for('logout') }}" class="logout-btn">LOGOUT</a>
-            </div>
-        </nav>
-    </header>
 
-    <div class="main-container">
-        <div class="hero-box">
-            <h2>Welcome back, <span class="gold-text">{{ user }}</span></h2>
-            <p>Select language and paste code below.</p>
-            
-            <div class="vertical-stack">
-                <select id="languageSelect">
-                    <option value="Python">Python</option>
-                    <option value="Java">Java</option>
-                    <option value="C++">C++</option>
-                </select>
-
-                <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
-                
-                <button id="debugBtn" onclick="runAnalysis()">Start Debugging</button>
-            </div>
-        </div>
+  <header class="header">
+    <div class="header-left">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo-image">
+      <h1 class="site-title">AI Code Debugger</h1>
     </div>
+    
+    <nav class="nav">
+      <ul class="nav-links">
+        <li><a href="{{ url_for('home') }}" class="nav-btn active">Home</a></li>
+        <li><a href="{{ url_for('view_history') }}" class="nav-btn">History</a></li>
+        <li><a href="{{ url_for('about') }}" class="nav-btn">About</a></li>
+      </ul>
+      <div class="nav-right">
+        <span class="user-greeting">Hi, <strong>{{ user }}</strong></span>
+        <a href="{{ url_for('logout') }}" class="logout-link">LOGOUT</a>
+      </div>
+    </nav>
+  </header>
 
-    <script>
-        async function runAnalysis() {
-            const code = document.getElementById('codeInput').value;
-            const lang = document.getElementById('languageSelect').value;
-            await fetch('/analyze', {
+  <section class="hero">
+    <div class="hero-overlay">
+      <h2>Welcome back, <span class="highlight">{{ user }}</span></h2>
+      <p>Select your language and paste your code snippet below to begin debugging.</p>
+      
+      <div class="debug-container">
+          <select id="languageSelect" class="lang-dropdown">
+              <option value="Python">Python</option>
+              <option value="Java">Java</option>
+              <option value="C++">C++</option>
+          </select>
+
+          <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
+          
+          <button class="start-debugging" onclick="runAnalysis()">Start Debugging</button>
+          
+          <div id="resultDisplay" class="result-box" style="display: none;">
+              <h3 id="resultStatus"></h3>
+              <p id="resultMessage"></p>
+          </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    async function runAnalysis() {
+        const code = document.getElementById('codeInput').value;
+        const language = document.getElementById('languageSelect').value;
+        const resultDisplay = document.getElementById('resultDisplay');
+
+        if (!code.trim()) {
+            alert("Please paste some code first!");
+            return;
+        }
+
+        try {
+            const response = await fetch('/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ code: code, language: lang })
+                body: JSON.stringify({ code: code, language: language })
             });
-            alert("Analysis Complete! Check History.");
+            const result = await response.json();
+            resultDisplay.style.display = 'block';
+            document.getElementById('resultStatus').innerText = result.status.toUpperCase();
+            document.getElementById('resultMessage').innerText = result.message;
+            resultDisplay.className = result.status === "success" ? "result-box success-theme" : "result-box error-theme";
+        } catch (error) {
+            alert("Connection error.");
         }
-    </script>
+    }
+  </script>
 </body>
 </html>
