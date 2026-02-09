@@ -8,34 +8,36 @@
     display: flex; width: 900px; height: 600px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
 }
 
-/* Form Styling */
-.form-container { flex: 1; padding: 60px; }
-h2 { font-size: 32px; font-weight: 500; }
+/* Form Side */
+.form-container { flex: 1; padding: 40px 60px; display: flex; flex-direction: column; justify-content: center; }
+h2 { font-size: 32px; font-weight: 600; margin-bottom: 5px; }
 p { color: #666; font-size: 14px; margin-bottom: 25px; }
 
-.input-field { margin-bottom: 15px; }
-.input-field label { display: block; font-size: 14px; margin-bottom: 5px; }
+.input-field { margin-bottom: 15px; text-align: left; }
+.input-field label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 5px; color: #333; }
 .input-field input { 
-    width: 100%; padding: 10px; border: 1px solid #D9D9D9; border-radius: 10px; outline: none; 
+    width: 100%; padding: 12px; border: 1px solid #D9D9D9; border-radius: 10px; outline: none; font-size: 14px;
 }
 
-.flex-label { display: flex; justify-content: space-between; }
-.forgot-txt { font-size: 11px; color: #0C2A92; text-decoration: none; }
+.password-header { display: flex; justify-content: space-between; align-items: center; }
+.forgot-link { font-size: 11px; color: #0C2A92; text-decoration: none; font-weight: 500; }
 
-.remember-row { display: flex; align-items: center; gap: 8px; font-size: 12px; margin: 15px 0; }
+.checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 12px; margin: 15px 0; }
+.checkbox-row input { cursor: pointer; }
 
-.submit-btn { 
+.btn-submit { 
     width: 100%; padding: 12px; background: #3A5B22; color: white; border: none; 
-    border-radius: 10px; font-weight: 700; cursor: pointer; 
+    border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 16px; transition: 0.3s;
 }
+.btn-submit:hover { background: #2d461a; }
 
-.separator { text-align: center; margin: 20px 0; color: #aaa; position: relative; }
+.separator { text-align: center; margin: 15px 0; color: #aaa; font-size: 14px; }
 
 .social-grid { display: flex; gap: 15px; }
 .social-item { 
-    flex: 1; border: 1px solid #D9D9D9; border-radius: 10px; padding: 8px;
+    flex: 1; border: 1px solid #D9D9D9; border-radius: 10px; padding: 10px;
     display: flex; align-items: center; justify-content: center; gap: 10px;
-    text-decoration: none; color: black; font-size: 12px;
+    text-decoration: none; color: black; font-size: 12px; font-weight: 500;
 }
 
 /* Visual Side */
@@ -43,22 +45,10 @@ p { color: #666; font-size: 14px; margin-bottom: 25px; }
     flex: 1; background: #1a1a1a; display: flex; align-items: center; justify-content: center; 
 }
 .robot-circle { 
-    width: 300px; height: 300px; background: rgba(255,255,255,0.05); 
-    border-radius: 50px; display: flex; align-items: center; justify-content: center; 
+    width: 280px; height: 280px; background: rgba(255,255,255,0.05); 
+    border-radius: 60px; display: flex; align-items: center; justify-content: center; 
 }
 .bot-icon { font-size: 120px; }
 
-.footer-text { text-align: center; margin-top: 20px; }
-.footer-text a { color: #0F3DDE; text-decoration: none; font-weight: 500; }
-
-
-/* Add this to the bottom of your existing loginstyle.css */
-.remember-row label u {
-    cursor: pointer;
-    color: #000;
-}
-
-/* Ensure headings in signup aren't too cramped */
-.form-container h2 {
-    margin-bottom: 10px;
-}
+.footer-text { text-align: center; margin-top: 20px; font-size: 14px; }
+.footer-text a { color: #0F3DDE; text-decoration: none; font-weight: 600; }
