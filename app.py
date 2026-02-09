@@ -64,7 +64,12 @@ def signup():
         hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
         new_user = User(username=username, email=email, password=hashed_pw)
         db.session.add(new_user)
-        db.session.commit()
+        # Check if database is read-only (Railway Volume issue)
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return f"Database Error: {str(e)}", 500
         return redirect(url_for("login"))
     return render_template("signup.html")
 
@@ -99,18 +104,25 @@ def forgot_password():
             try:
                 # Get variables from Railway
                 api_key = os.environ.get('SENDGRID_API_KEY')
-                sender = os.environ.get('MAIL_DEFAULT_SENDER')
+                sender_email = os.environ.get('MAIL_DEFAULT_SENDER')
                 
-                if not api_key or not sender:
+                if not api_key or not sender_email:
                     return render_template("forgot_password.html", error="Server configuration missing: Check Railway Variables.")
 
                 sg = sendgrid.SendGridAPIClient(api_key=api_key)
-                content_text = f"Hello {user.username},\n\nUse this link to login: {url_for('login', _external=True)}"
                 
+                # --- EDIT THESE TWO LINES FOR CUSTOM SUBJECT/NAME ---
+                custom_subject = "AI Code Corrector | Secure Password Reset"
+                custom_sender_name = "AI Support Team"
+                # ----------------------------------------------------
+
+                content_text = f"Hello {user.username},\n\nYou requested a password reset. Use this link to login to your account:\n\n{url_for('login', _external=True)}\n\nIf you did not request this, please ignore this email."
+                
+                # Create the message with a Custom Name
                 message = SG_Mail(
-                    from_email=sender,
+                    from_email=(sender_email, custom_sender_name),
                     to_emails=email,
-                    subject="Password Reset Request",
+                    subject=custom_subject,
                     plain_text_content=content_text
                 )
                 
@@ -118,7 +130,6 @@ def forgot_password():
                 return render_template("forgot_password.html", success=True, email=email)
             
             except Exception as e:
-                # This prevents the "Internal Server Error" and shows the actual problem
                 print(f"DEBUG: {str(e)}")
                 return render_template("forgot_password.html", error=f"Email failed: {str(e)}")
         else:
@@ -176,7 +187,6 @@ def analyze():
             message = f"Python Error: '{e.msg}' on line {e.lineno}."
     
     elif language == "Java" or language == "C++":
-        # Basic bracket check
         if code.count("{") != code.count("}"):
             status = "error"
             message = f"{language} Error: Mismatched Curly Braces."
