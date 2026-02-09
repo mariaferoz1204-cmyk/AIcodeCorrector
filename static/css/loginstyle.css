@@ -1,11 +1,11 @@
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
 
 .main-wrapper { 
-    height: 100vh; display: flex; align-items: center; justify-content: center; background: #f4f4f4; 
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f4f4f4; padding: 20px;
 }
 
 .login-card { 
-    display: flex; width: 900px; height: 600px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+    display: flex; width: 100%; max-width: 900px; min-height: 600px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
 }
 
 /* Form Side */
@@ -52,3 +52,26 @@ p { color: #666; font-size: 14px; margin-bottom: 25px; }
 
 .footer-text { text-align: center; margin-top: 20px; font-size: 14px; }
 .footer-text a { color: #0F3DDE; text-decoration: none; font-weight: 600; }
+
+/* --- MOBILE RESPONSIVE FIX --- */
+@media (max-width: 768px) {
+    .login-card {
+        flex-direction: column; /* Stack visual and form vertically */
+        height: auto;
+        width: 100%;
+    }
+
+    .visual-container {
+        display: none; /* Hide the robot on mobile to save space */
+    }
+
+    .form-container {
+        padding: 30px 20px; /* Reduce padding for smaller screens */
+    }
+
+    h2 { font-size: 24px; }
+
+    .social-grid {
+        flex-direction: column; /* Stack Google/Apple buttons */
+    }
+}
