@@ -87,7 +87,7 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
-# --- PASSWORD RESET ROUTE (UPDATED TO SENDGRID API) ---
+# --- PASSWORD RESET ROUTE (STABLE API VERSION) ---
 
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
@@ -96,31 +96,33 @@ def forgot_password():
         user = User.query.filter_by(email=email).first()
         
         if user:
-            # SendGrid API Logic - Much more reliable for Railway
-            sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
-            from_email = os.environ.get('MAIL_DEFAULT_SENDER')
-            to_email = email
-            subject = "Password Reset Request - AI Code Corrector"
-            
-            # Simple content for the reset link
-            content_text = f"Hello {user.username},\n\nYou requested a password reset. Use the link below to login:\n\n{url_for('login', _external=True)}\n\nIf you did not request this, please ignore this email."
-            
-            message = SG_Mail(
-                from_email=from_email,
-                to_emails=to_email,
-                subject=subject,
-                plain_text_content=content_text
-            )
-            
             try:
+                # Get variables from Railway
+                api_key = os.environ.get('SENDGRID_API_KEY')
+                sender = os.environ.get('MAIL_DEFAULT_SENDER')
+                
+                if not api_key or not sender:
+                    return render_template("forgot_password.html", error="Server configuration missing: Check Railway Variables.")
+
+                sg = sendgrid.SendGridAPIClient(api_key=api_key)
+                content_text = f"Hello {user.username},\n\nUse this link to login: {url_for('login', _external=True)}"
+                
+                message = SG_Mail(
+                    from_email=sender,
+                    to_emails=email,
+                    subject="Password Reset Request",
+                    plain_text_content=content_text
+                )
+                
                 sg.send(message)
                 return render_template("forgot_password.html", success=True, email=email)
+            
             except Exception as e:
-                print(f"SendGrid API Error: {e}")
-                # We show a helpful error if the API fails
-                return render_template("forgot_password.html", error="Email service is temporarily unavailable. Please verify your Sender Identity in SendGrid.")
+                # This prevents the "Internal Server Error" and shows the actual problem
+                print(f"DEBUG: {str(e)}")
+                return render_template("forgot_password.html", error=f"Email failed: {str(e)}")
         else:
-            return render_template("forgot_password.html", error="Email address not found in our system.")
+            return render_template("forgot_password.html", error="Email address not found.")
             
     return render_template("forgot_password.html")
 
@@ -164,35 +166,20 @@ def analyze():
     language = data.get("language", "Python")
     
     status = "success"
-    message = "No syntax errors found! Your code structure looks correct."
+    message = "No syntax errors found!"
 
     if language == "Python":
         try:
             compile(code, "<string>", "exec")
         except SyntaxError as e:
             status = "error"
-            message = f"Python Error: '{e.msg}' on line {e.lineno}. Hint: Check colons (:) or indentation."
+            message = f"Python Error: '{e.msg}' on line {e.lineno}."
     
     elif language == "Java" or language == "C++":
-        lines = code.split('\n')
-        bracket_count = 0
-        
-        for i, line in enumerate(lines):
-            clean_line = line.strip()
-            if not clean_line or clean_line.startswith(("//", "/*", "*", "#", "public class", "class", "void", "int main")):
-                bracket_count += clean_line.count("{") - clean_line.count("}")
-                continue
-            
-            bracket_count += clean_line.count("{") - clean_line.count("}")
-            
-            if clean_line and not clean_line.endswith((';', '{', '}', ',')):
-                status = "error"
-                message = f"{language} Error: Missing semicolon (;) on line {i+1}."
-                break
-        
-        if status == "success" and bracket_count != 0:
+        # Basic bracket check
+        if code.count("{") != code.count("}"):
             status = "error"
-            message = f"{language} Error: Mismatched Curly Braces. Check your opening and closing '{{ }}'."
+            message = f"{language} Error: Mismatched Curly Braces."
 
     new_entry = History(code_content=code, result=message, language=language, user_id=session["user_id"])
     db.session.add(new_entry)
@@ -201,7 +188,5 @@ def analyze():
     return jsonify({"status": status, "message": message})
 
 if __name__ == "__main__":
-    # Railway dynamic port handling
     port = int(os.environ.get("PORT", 8080))
-    # Debug mode is ON to help you see any remaining issues
     app.run(host="0.0.0.0", port=port, debug=True)
