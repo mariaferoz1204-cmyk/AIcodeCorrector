@@ -8,7 +8,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: #f4f4f4; overflow-x: hidden; }
 
-        /* HEADER FIX: Compact and clear */
+        /* HEADER: Horizontal row, sticky at top */
         .header {
             display: flex !important;
             justify-content: space-between;
@@ -23,7 +23,6 @@
         .header-left { display: flex; align-items: center; gap: 12px; }
         .site-title { font-size: 1.2rem; color: #333; }
         
-        /* NAVIGATION: Horizontal row, no bullets */
         .nav-container { display: flex !important; align-items: center; gap: 20px; }
         .nav-links { 
             display: flex !important; 
@@ -43,27 +42,27 @@
             font-size: 0.8rem;
         }
 
-        /* MAIN SECTION: Smaller panel, properly spaced */
+        /* MAIN SECTION: Centered Panel */
         .hero {
             padding: 40px 20px;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Keeps it from stretching to bottom */
+            align-items: flex-start;
             min-height: calc(100vh - 70px);
         }
         .hero-panel {
-            background: #444; /* Dark gray theme */
+            background: #444;
             color: white;
             padding: 30px;
             border-radius: 12px;
             width: 100%;
-            max-width: 650px; /* Reduced width */
+            max-width: 650px;
             text-align: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         .highlight { background: #E5B300; color: black; padding: 0 6px; border-radius: 3px; }
 
-        /* VERTICAL STACK: Organized dropdown and box */
+        /* VERTICAL STACK */
         .debug-stack {
             display: flex !important;
             flex-direction: column !important;
@@ -78,13 +77,14 @@
         }
         .styled-textarea {
             width: 100%;
-            height: 200px; /* Reduced height to prevent covering page */
+            height: 200px;
             padding: 15px;
             border-radius: 8px;
             border: none;
             font-family: monospace;
             font-size: 13px;
             resize: vertical;
+            color: #333;
         }
         .debug-btn {
             width: 100%;
@@ -95,8 +95,23 @@
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
+            transition: 0.3s;
         }
         .debug-btn:hover { background: #E5B300; color: #000; }
+
+        /* RESULT BOX STYLES */
+        #resultBox {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none; /* Hidden until debugging starts */
+            text-align: left;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            white-space: pre-wrap; /* Maintains error formatting */
+        }
+        .error-msg { background: #fee2e2; color: #b91c1c; border: 1px solid #f87171; }
+        .success-msg { background: #dcfce7; color: #15803d; border: 1px solid #4ade80; }
     </style>
 </head>
 <body>
@@ -131,6 +146,8 @@
                 <textarea id="codeInput" class="styled-textarea" placeholder="Paste your code here..."></textarea>
                 
                 <button class="debug-btn" onclick="runAnalysis()">Start Debugging</button>
+
+                <div id="resultBox"></div>
             </div>
         </div>
     </main>
@@ -139,14 +156,40 @@
         async function runAnalysis() {
             const code = document.getElementById('codeInput').value;
             const lang = document.getElementById('languageSelect').value;
-            if(!code.trim()) return alert("Please paste code!");
+            const resultBox = document.getElementById('resultBox');
+
+            if(!code.trim()) {
+                resultBox.style.display = "block";
+                resultBox.className = "error-msg";
+                resultBox.innerHTML = "<strong>Notice:</strong> Please paste some code first!";
+                return;
+            }
             
-            const response = await fetch('/analyze', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ code: code, language: lang })
-            });
-            alert("Analysis Complete!");
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ code: code, language: lang })
+                });
+                
+                const data = await response.json();
+                
+                // Show result box
+                resultBox.style.display = "block";
+                
+                if (data.status === "success" && data.message === "No syntax errors found!") {
+                    resultBox.className = "success-msg";
+                    resultBox.innerHTML = "<strong>Success!</strong><br>" + data.message;
+                } else {
+                    resultBox.className = "error-msg";
+                    resultBox.innerHTML = "<strong>Debugger Found Issues:</strong><br>" + data.message;
+                }
+
+            } catch (error) {
+                resultBox.style.display = "block";
+                resultBox.className = "error-msg";
+                resultBox.innerHTML = "<strong>Connection Error:</strong> Could not reach the server.";
+            }
         }
     </script>
 </body>
