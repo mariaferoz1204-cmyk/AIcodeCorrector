@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
@@ -15,6 +16,18 @@ app.secret_key = "ai_debugger_secure_key_2024_final"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+# --- EMAIL CONFIGURATION (SENDGRID) ---
+app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'apikey' 
+# Your specific API Key included below
+app.config['MAIL_PASSWORD'] = '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' 
+# CHANGE THIS to your verified SendGrid email address
+app.config['MAIL_DEFAULT_SENDER'] = 'your-verified-email@example.com' 
+
+mail = Mail(app)
 
 # --- DATABASE MODELS ---
 class User(db.Model):
@@ -70,6 +83,30 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for("login"))
+
+# --- PASSWORD RESET ROUTE ---
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form.get("email")
+        user = User.query.filter_by(email=email).first()
+        
+        if user:
+            msg = Message("Password Reset Request - AI Code Corrector",
+                          recipients=[email])
+            msg.body = f"Hello {user.username},\n\nYou requested a password reset. Use the link below to login and change your settings:\n\n{url_for('login', _external=True)}\n\nIf you did not request this, please ignore this email."
+            
+            try:
+                mail.send(msg)
+                return render_template("forgot_password.html", success=True, email=email)
+            except Exception as e:
+                print(f"Error: {e}")
+                return render_template("forgot_password.html", error="Email service failed. Check your Sender Verification in SendGrid.")
+        else:
+            return render_template("forgot_password.html", error="Email address not found in our system.")
+            
+    return render_template("forgot_password.html")
 
 # --- PAGE ROUTES ---
 
@@ -132,18 +169,15 @@ def analyze():
             
             bracket_count += clean_line.count("{") - clean_line.count("}")
             
-            # Catch missing semicolons on logic lines
             if clean_line and not clean_line.endswith((';', '{', '}', ',')):
                 status = "error"
                 message = f"{language} Error: Missing semicolon (;) on line {i+1}."
                 break
         
-        # Catch mismatched braces if no semicolon error was found yet
         if status == "success" and bracket_count != 0:
             status = "error"
             message = f"{language} Error: Mismatched Curly Braces. Check your opening and closing '{{ }}'."
 
-    # Save results to the database
     new_entry = History(code_content=code, result=message, language=language, user_id=session["user_id"])
     db.session.add(new_entry)
     db.session.commit()
