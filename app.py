@@ -5,6 +5,8 @@ from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
+import sendgrid
+from sendgrid.helpers.mail import Mail as SG_Mail
 
 app = Flask(__name__)
 CORS(app)
@@ -13,7 +15,6 @@ CORS(app)
 app.secret_key = os.environ.get("SECRET_KEY", "ai_debugger_secure_key_2024_final")
 
 # --- DATABASE CONFIGURATION ---
-# Use PostgreSQL on Railway if available, otherwise fallback to SQLite
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
 if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
     app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://", 1)
@@ -21,12 +22,11 @@ if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# --- EMAIL CONFIGURATION (SENDGRID) ---
-# --- EMAIL CONFIGURATION (SENDGRID) ---
+# --- EMAIL CONFIGURATION (LEGACY SMTP - KEPT FOR COMPATIBILITY) ---
 app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False  # <--- THIS MUST BE FALSE
+app.config['MAIL_USE_SSL'] = False
 app.config['MAIL_USERNAME'] = 'apikey' 
 app.config['MAIL_PASSWORD'] = os.environ.get('SENDGRID_API_KEY')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
@@ -87,7 +87,7 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
-# --- PASSWORD RESET ROUTE ---
+# --- PASSWORD RESET ROUTE (UPDATED TO SENDGRID API) ---
 
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
@@ -96,16 +96,29 @@ def forgot_password():
         user = User.query.filter_by(email=email).first()
         
         if user:
-            msg = Message("Password Reset Request - AI Code Corrector",
-                          recipients=[email])
-            msg.body = f"Hello {user.username},\n\nYou requested a password reset. Use the link below to login and change your settings:\n\n{url_for('login', _external=True)}\n\nIf you did not request this, please ignore this email."
+            # SendGrid API Logic - Much more reliable for Railway
+            sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
+            from_email = os.environ.get('MAIL_DEFAULT_SENDER')
+            to_email = email
+            subject = "Password Reset Request - AI Code Corrector"
+            
+            # Simple content for the reset link
+            content_text = f"Hello {user.username},\n\nYou requested a password reset. Use the link below to login:\n\n{url_for('login', _external=True)}\n\nIf you did not request this, please ignore this email."
+            
+            message = SG_Mail(
+                from_email=from_email,
+                to_emails=to_email,
+                subject=subject,
+                plain_text_content=content_text
+            )
             
             try:
-                mail.send(msg)
+                sg.send(message)
                 return render_template("forgot_password.html", success=True, email=email)
             except Exception as e:
-                print(f"SMTP Error: {e}")
-                return render_template("forgot_password.html", error=f"Email service failed: {str(e)}")
+                print(f"SendGrid API Error: {e}")
+                # We show a helpful error if the API fails
+                return render_template("forgot_password.html", error="Email service is temporarily unavailable. Please verify your Sender Identity in SendGrid.")
         else:
             return render_template("forgot_password.html", error="Email address not found in our system.")
             
@@ -188,6 +201,7 @@ def analyze():
     return jsonify({"status": status, "message": message})
 
 if __name__ == "__main__":
+    # Railway dynamic port handling
     port = int(os.environ.get("PORT", 8080))
-    # debug=True will show the real error in your browser
+    # Debug mode is ON to help you see any remaining issues
     app.run(host="0.0.0.0", port=port, debug=True)
