@@ -5,106 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Code Debugger</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #f0f0f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: #f4f4f4; overflow-x: hidden; }
 
-        /* HEADER ROW FIX */
+        /* HEADER FIX: Compact and clear */
         .header {
             display: flex !important;
             justify-content: space-between;
             align-items: center;
             padding: 10px 40px;
-            background: #ffffff;
+            background: #fff;
             border-bottom: 2px solid #E5B300;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
-        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .site-title { font-size: 1.2rem; color: #333; }
         
-        /* NAV LINKS IN A ROW - NO DOTS */
-        .nav-container { display: flex !important; align-items: center; gap: 25px; }
+        /* NAVIGATION: Horizontal row, no bullets */
+        .nav-container { display: flex !important; align-items: center; gap: 20px; }
         .nav-links { 
             display: flex !important; 
             list-style: none !important; 
-            gap: 20px; 
-            padding: 0; margin: 0;
+            gap: 15px; 
         }
-        .nav-links li { display: inline-block; }
-        .nav-links a { text-decoration: none; color: #333; font-weight: 600; }
+        .nav-links a { text-decoration: none; color: #555; font-weight: 600; font-size: 0.9rem; }
         .nav-links a:hover { color: #E5B300; }
 
         .logout-btn {
             background: #E5B300;
             color: white;
-            padding: 8px 18px;
-            border-radius: 5px;
+            padding: 6px 14px;
+            border-radius: 4px;
             text-decoration: none;
             font-weight: bold;
+            font-size: 0.8rem;
         }
 
-        /* MAIN SECTION: VERTICAL STACK */
+        /* MAIN SECTION: Smaller panel, properly spaced */
         .hero {
-            height: 90vh;
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Keeps it from stretching to bottom */
+            min-height: calc(100vh - 70px);
         }
         .hero-panel {
-            background: #666666; /* Your Grey Panel */
+            background: #444; /* Dark gray theme */
             color: white;
-            padding: 40px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 800px;
+            padding: 30px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 650px; /* Reduced width */
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .highlight { background: #E5B300; color: black; padding: 2px 8px; border-radius: 4px; }
+        .highlight { background: #E5B300; color: black; padding: 0 6px; border-radius: 3px; }
 
-        /* THE FIX: STACK DROPDOWN -> TEXTAREA -> BUTTON */
+        /* VERTICAL STACK: Organized dropdown and box */
         .debug-stack {
             display: flex !important;
             flex-direction: column !important;
-            gap: 20px;
-            margin-top: 30px;
-            width: 100%;
+            gap: 15px;
+            margin-top: 20px;
         }
         .styled-select {
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 10px;
+            border-radius: 6px;
             border: 2px solid #E5B300;
-            font-size: 16px;
         }
         .styled-textarea {
-            width: 100% !important;
-            height: 300px !important; /* BIG SECTION */
-            padding: 20px;
-            border-radius: 10px;
+            width: 100%;
+            height: 200px; /* Reduced height to prevent covering page */
+            padding: 15px;
+            border-radius: 8px;
             border: none;
-            font-family: 'Consolas', monospace;
-            font-size: 14px;
-            resize: none;
+            font-family: monospace;
+            font-size: 13px;
+            resize: vertical;
         }
         .debug-btn {
             width: 100%;
-            padding: 15px;
-            background: black;
-            color: white;
+            padding: 12px;
+            background: #000;
+            color: #fff;
             border: none;
-            border-radius: 8px;
-            font-size: 18px;
+            border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.3s;
         }
-        .debug-btn:hover { background: #E5B300; color: black; }
+        .debug-btn:hover { background: #E5B300; color: #000; }
     </style>
 </head>
 <body>
 
     <header class="header">
         <div class="header-left">
-            <img src="{{ url_for('static', filename='logo.png') }}" width="40">
-            <h1>AI Code Debugger</h1>
+            <img src="{{ url_for('static', filename='logo.png') }}" width="35">
+            <h1 class="site-title">AI Code Debugger</h1>
         </div>
         <nav class="nav-container">
             <ul class="nav-links">
@@ -118,8 +118,8 @@
 
     <main class="hero">
         <div class="hero-panel">
-            <h2>Welcome back, <span class="highlight">{{ user }}</span></h2>
-            <p style="margin-top: 10px;">Select language and paste code below.</p>
+            <h3>Welcome back, <span class="highlight">{{ user }}</span></h3>
+            <p style="font-size: 0.9rem; margin-top: 5px; opacity: 0.9;">Select language and start debugging.</p>
 
             <div class="debug-stack">
                 <select id="languageSelect" class="styled-select">
@@ -146,7 +146,7 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ code: code, language: lang })
             });
-            alert("Done! Check History page for results.");
+            alert("Analysis Complete!");
         }
     </script>
 </body>
