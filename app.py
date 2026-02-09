@@ -93,7 +93,6 @@ def view_history():
     if not user:
         session.clear()
         return redirect(url_for("login"))
-    # Fetch user history sorted by newest first
     user_history = History.query.filter_by(user_id=user.id).order_by(History.timestamp.desc()).all()
     return render_template("history.html", history=user_history, user=session.get("user"))
 
@@ -105,6 +104,9 @@ def analyze():
         return jsonify({"status": "error", "message": "Unauthorized"}), 401
 
     data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"status": "error", "message": "No data received"}), 400
+        
     code = data.get("code", "")
     language = data.get("language", "Python")
     
@@ -125,7 +127,7 @@ def analyze():
             message = "Java Error: Missing Semicolon (;)."
         elif code.count("{") != code.count("}"):
             status = "error"
-            message = f"Java Error: Mismatched Curly Braces."
+            message = "Java Error: Mismatched Curly Braces."
 
     elif language == "C++":
         stripped_code = code.strip()
