@@ -23,8 +23,7 @@ app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'apikey' 
 # Your specific API Key included below
-app.config['MAIL_PASSWORD'] = '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' 
-# CHANGE THIS to your verified SendGrid email address
+app.config['MAIL_PASSWORD'] = os.environ.get('SENDGRID_API_KEY')# CHANGE THIS to your verified SendGrid email address
 app.config['MAIL_DEFAULT_SENDER'] = 'your-verified-email@example.com' 
 
 mail = Mail(app)
