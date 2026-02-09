@@ -188,6 +188,6 @@ def analyze():
     return jsonify({"status": status, "message": message})
 
 if __name__ == "__main__":
-    # Railway provides the PORT variable; locally it uses 3000
-    port = int(os.environ.get("PORT", 3000))
-    app.run(host="0.0.0.0", port=port)
+    port = int(os.environ.get("PORT", 8080))
+    # debug=True will show the real error in your browser
+    app.run(host="0.0.0.0", port=port, debug=True)
