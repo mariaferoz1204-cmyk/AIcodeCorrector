@@ -10,10 +10,14 @@ app = Flask(__name__)
 CORS(app)
 
 # Session Security
-app.secret_key = "ai_debugger_secure_key_2024_final"
+app.secret_key = os.environ.get("SECRET_KEY", "ai_debugger_secure_key_2024_final")
 
 # --- DATABASE CONFIGURATION ---
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+# Use PostgreSQL on Railway if available, otherwise fallback to SQLite
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
+if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
+    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://", 1)
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -21,10 +25,10 @@ db = SQLAlchemy(app)
 app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
 app.config['MAIL_USERNAME'] = 'apikey' 
-# Your specific API Key included below
-app.config['MAIL_PASSWORD'] = os.environ.get('SENDGRID_API_KEY')# CHANGE THIS to your verified SendGrid email address
-app.config['MAIL_DEFAULT_SENDER'] = 'your-verified-email@example.com' 
+app.config['MAIL_PASSWORD'] = os.environ.get('SENDGRID_API_KEY')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
 
 mail = Mail(app)
 
@@ -100,8 +104,8 @@ def forgot_password():
                 mail.send(msg)
                 return render_template("forgot_password.html", success=True, email=email)
             except Exception as e:
-                print(f"Error: {e}")
-                return render_template("forgot_password.html", error="Email service failed. Check your Sender Verification in SendGrid.")
+                print(f"SMTP Error: {e}")
+                return render_template("forgot_password.html", error=f"Email service failed: {str(e)}")
         else:
             return render_template("forgot_password.html", error="Email address not found in our system.")
             
@@ -184,4 +188,6 @@ def analyze():
     return jsonify({"status": status, "message": message})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3000, debug=True)
+    # Railway provides the PORT variable; locally it uses 3000
+    port = int(os.environ.get("PORT", 3000))
+    app.run(host="0.0.0.0", port=port)
