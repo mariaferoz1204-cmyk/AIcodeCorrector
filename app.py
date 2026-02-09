@@ -120,23 +120,28 @@ def analyze():
             status = "error"
             message = f"Python Error: '{e.msg}' on line {e.lineno}. Hint: Check colons (:) or indentation."
     
-    elif language == "Java":
-        stripped_code = code.strip()
-        if not (stripped_code.endswith(";") or stripped_code.endswith("}")):
+    elif language == "Java" or language == "C++":
+        lines = code.split('\n')
+        bracket_count = 0
+        
+        for i, line in enumerate(lines):
+            clean_line = line.strip()
+            if not clean_line or clean_line.startswith(("//", "/*", "*", "#", "public class", "class", "void", "int main")):
+                bracket_count += clean_line.count("{") - clean_line.count("}")
+                continue
+            
+            bracket_count += clean_line.count("{") - clean_line.count("}")
+            
+            # Catch missing semicolons on logic lines
+            if clean_line and not clean_line.endswith((';', '{', '}', ',')):
+                status = "error"
+                message = f"{language} Error: Missing semicolon (;) on line {i+1}."
+                break
+        
+        # Catch mismatched braces if no semicolon error was found yet
+        if status == "success" and bracket_count != 0:
             status = "error"
-            message = "Java Error: Missing Semicolon (;)."
-        elif code.count("{") != code.count("}"):
-            status = "error"
-            message = "Java Error: Mismatched Curly Braces."
-
-    elif language == "C++":
-        stripped_code = code.strip()
-        if code.count("{") != code.count("}"):
-            status = "error"
-            message = "C++ Error: Mismatched Curly Braces."
-        elif not (stripped_code.endswith(";") or stripped_code.endswith("}")):
-            status = "error"
-            message = "C++ Error: Missing Semicolon."
+            message = f"{language} Error: Mismatched Curly Braces. Check your opening and closing '{{ }}'."
 
     # Save results to the database
     new_entry = History(code_content=code, result=message, language=language, user_id=session["user_id"])
