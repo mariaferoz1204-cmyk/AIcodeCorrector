@@ -123,7 +123,7 @@ def analyze():
     
     # AI Logic - Carefully check the indentation below!
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash-latest')
+        model = genai.GenerativeModel('gemini-1.0-pro')
         prompt = f"Analyze this {language} code for syntax and logical errors. If there are errors, explain and provide corrected code. If perfect, say 'Success: No errors found!'.\n\nCode:\n{code}"
         response = model.generate_content(prompt)
         message = response.text
