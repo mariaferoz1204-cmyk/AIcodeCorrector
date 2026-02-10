@@ -99,16 +99,14 @@ def forgot_password():
     if request.method == "POST":
         email = request.form.get("email")
         user = User.query.filter_by(email=email).first()
-        
         if user:
-            try:
-                # Get variables from Railway
-                api_key = os.environ.get('SENDGRID_API_KEY')
-                sender_email = os.environ.get('MAIL_DEFAULT_SENDER')
-                
-                if not api_key or not sender_email:
-                    return render_template("forgot_password.html", error="Server configuration missing: Check Railway Variables.")
+            # We use os.environ.get to pull the keys from Railway's settings
+            api_key = os.environ.get('SENDGRID_API_KEY')
+            sender_email = os.environ.get('MAIL_DEFAULT_SENDER')
 
+            # This is where your error "Server configuration missing" is triggered!
+            if not api_key or not sender_email:
+                return render_template("forgot_password.html", error="Server configuration missing: Check Railway Variables.")
                 sg = sendgrid.SendGridAPIClient(api_key=api_key)
                 
                 # --- EDIT THESE TWO LINES FOR CUSTOM SUBJECT/NAME ---
