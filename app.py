@@ -122,14 +122,26 @@ def analyze():
     language = data.get("language", "Python")
     
     # AI Logic - Carefully check the indentation below!
+   # AI Logic - Final Stable Version
     try:
-        model = genai.GenerativeModel('gemini-1.0-pro')
+        # 1. Force use the most stable flash model with the full path
+        model = genai.GenerativeModel(model_name='models/gemini-1.5-flash')
+        
         prompt = f"Analyze this {language} code for syntax and logical errors. If there are errors, explain and provide corrected code. If perfect, say 'Success: No errors found!'.\n\nCode:\n{code}"
+        
+        # 2. Use the most reliable content generation format
         response = model.generate_content(prompt)
-        message = response.text
-        status = "success"
+        
+        if response and response.text:
+            message = response.text
+            status = "success"
+        else:
+            status = "error"
+            message = "AI returned an empty response. Check your API usage limits."
+            
     except Exception as e:
         status = "error"
+        # This will tell us if the error is STILL a 404 or something new
         message = f"AI Error: {str(e)}"
 
     new_entry = History(code_content=code, result=message, language=language, user_id=session["user_id"])
