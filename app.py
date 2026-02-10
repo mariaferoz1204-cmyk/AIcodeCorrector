@@ -123,7 +123,7 @@ def analyze():
     
     # AI Logic
     try:
-        model = genai.GenerativeModel('gemini-pro')
+       model = genai.GenerativeModel('models/gemini-1.5-flash')
         prompt = f"Analyze this {language} code for syntax and logical errors. If there are errors, explain and provide corrected code. If perfect, say 'Success: No errors found!'.\n\nCode:\n{code}"
         response = model.generate_content(prompt)
         message = response.text
