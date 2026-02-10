@@ -121,9 +121,9 @@ def analyze():
     code = data.get("code", "")
     language = data.get("language", "Python")
     
-    # AI Logic
+    # AI Logic - Carefully check the indentation below!
     try:
-       model = genai.GenerativeModel('models/gemini-1.5-flash')
+        model = genai.GenerativeModel('models/gemini-1.5-flash')
         prompt = f"Analyze this {language} code for syntax and logical errors. If there are errors, explain and provide corrected code. If perfect, say 'Success: No errors found!'.\n\nCode:\n{code}"
         response = model.generate_content(prompt)
         message = response.text
@@ -131,6 +131,12 @@ def analyze():
     except Exception as e:
         status = "error"
         message = f"AI Error: {str(e)}"
+
+    new_entry = History(code_content=code, result=message, language=language, user_id=session["user_id"])
+    db.session.add(new_entry)
+    db.session.commit()
+
+    return jsonify({"status": status, "message": message})
 
     new_entry = History(code_content=code, result=message, language=language, user_id=session["user_id"])
     db.session.add(new_entry)
