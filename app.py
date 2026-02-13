@@ -102,19 +102,27 @@ def forgot_password():
         
         if user:
             try:
+                # Get variables from Railway
                 api_key = os.environ.get('SENDGRID_API_KEY')
                 sender_email = os.environ.get('MAIL_DEFAULT_SENDER')
                 
                 if not api_key or not sender_email:
-                    return render_template("forgot_password.html", error="Server configuration missing.")
+                    return render_template("forgot_password.html", error="Server configuration missing: Check Railway Variables.")
 
                 sg = sendgrid.SendGridAPIClient(api_key=api_key)
-                content_text = f"Hi {user.username}, use this link to login: {url_for('login', _external=True)}"
                 
+                # --- EDIT THESE TWO LINES FOR CUSTOM SUBJECT/NAME ---
+                custom_subject = "AI Code Corrector | Secure Password Reset"
+                custom_sender_name = "AI Support Team"
+                # ----------------------------------------------------
+
+                content_text = f"Hello {user.username},\n\nYou requested a password reset. Use this link to login to your account:\n\n{url_for('login', _external=True)}\n\nIf you did not request this, please ignore this email."
+                
+                # Create the message with a Custom Name
                 message = SG_Mail(
-                    from_email=(sender_email, "AI Support"),
+                    from_email=(sender_email, custom_sender_name),
                     to_emails=email,
-                    subject="Password Reset",
+                    subject=custom_subject,
                     plain_text_content=content_text
                 )
                 
@@ -122,12 +130,13 @@ def forgot_password():
                 return render_template("forgot_password.html", success=True, email=email)
             
             except Exception as e:
+                print(f"DEBUG: {str(e)}")
                 return render_template("forgot_password.html", error=f"Email failed: {str(e)}")
         else:
-            # THIS IS THE LINE YOU FIXED: It must be indented!
             return render_template("forgot_password.html", error="Email address not found.")
             
     return render_template("forgot_password.html")
+
 # --- PAGE ROUTES ---
 
 @app.route("/")
