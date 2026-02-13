@@ -11,12 +11,12 @@
     <div class="main-wrapper">
         <div class="login-card">
             <div class="form-container">
-                <h2>Get Started Now</h2>
-                <p>Create your account to start analyzing code</p>
+                <h2>Create Account</h2>
+                <p>Join us to start correcting your code with AI</p>
 
                 <form action="/signup" method="POST">
                     <div class="input-field">
-                        <label>Name</label>
+                        <label>Full Name</label>
                         <input type="text" name="username" placeholder="Enter your name" required>
                     </div>
 
@@ -30,28 +30,26 @@
                         <input type="password" name="password" placeholder="Create a password" required>
                     </div>
 
-                    <div class="checkbox-row">
-                        <input type="checkbox" id="terms" name="terms" required>
-                        <label for="terms">I agree to the <u>terms & policy</u></label>
-                    </div>
-
-                    <button type="submit" class="btn-submit">Signup</button>
+                    <button type="submit" class="btn-submit">Sign Up</button>
                 </form>
 
-                <div class="separator">Or</div>
+                <div class="separator" style="margin: 20px 0; text-align: center; color: #888;">Or</div>
 
-                <div class="social-grid">
-                    <a href="#" class="social-item">
-                        <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18">
-                        Sign in with Google
+                <div class="social-grid" style="display: flex; gap: 12px; margin-top: 20px; width: 100%;">
+                    <a href="{{ url_for('google_login') }}" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px; border: 1px solid #e0e0e0; border-radius: 8px; text-decoration: none; color: #333; background: white; font-size: 14px; font-weight: 500; height: 45px;">
+                        <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18" style="margin-right: 8px;">
+                        Google
                     </a>
-                    <a href="#" class="social-item">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" width="18">
-                        Sign in with Apple
+
+                    <a href="#" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px; border: 1px solid #e0e0e0; border-radius: 8px; text-decoration: none; color: #333; background: white; font-size: 14px; font-weight: 500; height: 45px;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" width="18" style="margin-right: 8px;">
+                        Apple
                     </a>
                 </div>
 
-                <p class="footer-text">Have an account? <a href="/login">Sign In</a></p>
+                <p class="footer-text" style="margin-top: 25px; text-align: center;">
+                    Already have an account? <a href="/login" style="color: #4A6741; font-weight: 700; text-decoration: none;">Login</a>
+                </p>
             </div>
 
             <div class="visual-container">
