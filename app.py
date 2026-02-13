@@ -247,15 +247,30 @@ def analyze_code(code, language):
 
     # --- 3. JAVA CHECK (Basic + Complex) ---
     elif language == "Java":
-        # Basic: Braces
+        # 1. Basic: Mismatched Braces
         if code.count('{') != code.count('}'):
             errors.append("Java Error: Mismatched Curly Braces.")
             
-        # Complex: Static vs Non-static
+        # 2. Complex: Static vs Non-static
         if "public static void main" in code and re.search(r'(?<!new\s)\b\w+\(\);', code):
-            # Exclude standard keywords to avoid false positives
-            if not re.search(r'\b(System|if|for|while|switch)\b', code):
+            # If it's not a standard keyword, it's likely an invalid non-static call
+            if not re.search(r'\b(System|if|for|while|switch|return|super|this)\b', code):
                 errors.append("Java Error: Cannot call non-static method from static main.")
+
+        # 3. Basic & Complex: Missing Semicolons (Line-by-Line)
+        lines = code.split('\n')
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            # Ignore comments and empty lines
+            code_only = stripped.split('//')[0].strip()
+            
+            if code_only and not code_only.endswith(('{', '}', ';', ':', ',')):
+                # If the line looks like an assignment or a method call, it NEEDS a semicolon
+                if any(char in code_only for char in ['=', '(', ')']):
+                    # Safety check: ignore class/method headers
+                    if not any(word in code_only for word in ['class', 'public', 'static', 'void']):
+                        errors.append(f"Java Error: Missing semicolon ';' on line {i+1}.")
+                        break
 
     return errors[0] if errors else "Success: No syntax errors found!"
 if __name__ == "__main__":
