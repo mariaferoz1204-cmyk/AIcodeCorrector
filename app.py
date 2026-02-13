@@ -133,8 +133,7 @@ def forgot_password():
                 print(f"DEBUG: {str(e)}")
                 return render_template("forgot_password.html", error=f"Email failed: {str(e)}")
         else:
-            return render_template("forgot_password.html", error="Email address not found.")
-            
+return render_template("forgot_password.html", success=True, email=email, message="Success! Reset link sent. Please check your Inbox and your Spam folder.")            
     return render_template("forgot_password.html")
 
 # --- PAGE ROUTES ---
