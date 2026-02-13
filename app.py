@@ -219,60 +219,51 @@ def analyze():
 def analyze_code(code, language):
     errors = []
     
-    # --- 1. PYTHON CHECK (Basic + Complex) ---
+    # --- 1. PYTHON DETAILED CHECK ---
     if language == "Python":
         try:
-            # Basic: Catches syntax, colons, and indentation
-            compile(code, "<string>", "exec") 
-            
-            # Complex: Logic check for potential crash
-            if "/" in code and "len(" not in code and "if" not in code:
-                errors.append("Python Logic Warning: Potential ZeroDivisionError in calculation.")
+            compile(code, "<string>", "exec")
         except SyntaxError as e:
-            errors.append(f"Python Error: '{e.msg}' on line {e.lineno}.")
-
-    # --- 2. C++ CHECK (Basic + Complex) ---
-    elif language == "C++":
-        # Basic: Braces
-        if code.count('{') != code.count('}'):
-            errors.append("C++ Error: Mismatched Curly Braces.")
+            errors.append(f"<b>Syntax Error:</b> '{e.msg}' on line {e.lineno}.")
         
-        # Complex: Missing semicolon after class
-        if re.search(r'(class|struct)\s+\w+\s*\{[\s\S]*?\}\s*(?!;)', code):
-            errors.append("C++ Error: Missing semicolon ';' after class definition.")
-            
-        # Complex: Out of bounds
-        if re.search(r'<=\s*\w+\.size\(\)', code):
-            errors.append("C++ Logic Error: Potential Out-of-Bounds (use '<' instead of '<=').")
+        # Complex Logic Details
+        if "/" in code and "if len" not in code and "if scores" not in code:
+            errors.append("<b>Logic Warning:</b> Potential ZeroDivisionError. You should check if your list is empty before dividing.")
 
-    # --- 3. JAVA CHECK (Basic + Complex) ---
-    elif language == "Java":
-        # 1. Basic: Mismatched Braces
+    # --- 2. C++ DETAILED CHECK ---
+    elif language == "C++":
         if code.count('{') != code.count('}'):
-            errors.append("Java Error: Mismatched Curly Braces.")
+            errors.append("<b>Brace Error:</b> You have mismatched curly braces { }.")
+        
+        if re.search(r'(class|struct)\s+\w+\s*\{[\s\S]*?\}\s*(?!;)', code):
+            errors.append("<b>Missing Semicolon:</b> C++ requires a ';' immediately after a class or struct closing brace.")
             
-        # 2. Complex: Static vs Non-static
-        if "public static void main" in code and re.search(r'(?<!new\s)\b\w+\(\);', code):
-            # If it's not a standard keyword, it's likely an invalid non-static call
-            if not re.search(r'\b(System|if|for|while|switch|return|super|this)\b', code):
-                errors.append("Java Error: Cannot call non-static method from static main.")
+        if re.search(r'<=\s*\w+\.size\(\)', code):
+            errors.append("<b>Logic Error:</b> Potential Out-of-Bounds. Using '<=' with .size() targets an index that doesn't exist. Use '<' instead.")
 
-        # 3. Basic & Complex: Missing Semicolons (Line-by-Line)
+    # --- 3. JAVA DETAILED CHECK ---
+    elif language == "Java":
+        if code.count('{') != code.count('}'):
+            errors.append("<b>Brace Error:</b> Mismatched curly braces { }.")
+            
+        if "public static void main" in code and re.search(r'(?<!new\s)\b\w+\(\);', code):
+            if not re.search(r'\b(System|if|for|while|switch|return)\b', code):
+                errors.append("<b>Static Context Error:</b> You cannot call a non-static method directly from 'main'. Create an object or make the method 'static'.")
+
+        # Semicolon Scanner
         lines = code.split('\n')
         for i, line in enumerate(lines):
-            stripped = line.strip()
-            # Ignore comments and empty lines
-            code_only = stripped.split('//')[0].strip()
-            
-            if code_only and not code_only.endswith(('{', '}', ';', ':', ',')):
-                # If the line looks like an assignment or a method call, it NEEDS a semicolon
-                if any(char in code_only for char in ['=', '(', ')']):
-                    # Safety check: ignore class/method headers
-                    if not any(word in code_only for word in ['class', 'public', 'static', 'void']):
-                        errors.append(f"Java Error: Missing semicolon ';' on line {i+1}.")
-                        break
+            code_part = line.split('//')[0].strip()
+            if code_part and not code_part.endswith(('{', '}', ';', ':', ',')):
+                if any(op in code_part for op in ['=', '(', 'println']):
+                    if not any(k in code_part for k in ['public', 'static', 'void', 'class']):
+                        errors.append(f"<b>Missing Semicolon:</b> Line {i+1} needs a ';' at the end.")
 
-    return errors[0] if errors else "Success: No syntax errors found!"
+    # --- RETURN ALL ERRORS IN DETAIL ---
+    if errors:
+        # Join errors with line breaks for a detailed list
+        return "<br>• " + "<br>• ".join(errors)
+    return "Success: No syntax errors found!"
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=True)
