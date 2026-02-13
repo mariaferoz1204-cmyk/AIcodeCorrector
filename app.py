@@ -111,14 +111,22 @@ def forgot_password():
 
                 sg = sendgrid.SendGridAPIClient(api_key=api_key)
                 
-                # --- EDIT THESE TWO LINES FOR CUSTOM SUBJECT/NAME ---
+                # --- CUSTOMIZATION ---
                 custom_subject = "AI Code Corrector | Secure Password Reset"
                 custom_sender_name = "AI Support Team"
-                # ----------------------------------------------------
-
-                content_text = f"Hello {user.username},\n\nYou requested a password reset. Use this link to login to your account:\n\n{url_for('login', _external=True)}\n\nIf you did not request this, please ignore this email."
                 
-                # Create the message with a Custom Name
+                # NEW LOGIC: Generate a specific URL for resetting the password
+                reset_url = url_for('reset_password', email=user.email, _external=True)
+
+                # UPDATED TEXT: Now tells the user to click the reset link
+                content_text = (
+                    f"Hello {user.username},\n\n"
+                    f"You requested a password reset. Please click the link below to set a new password:\n\n"
+                    f"{reset_url}\n\n"
+                    f"If you did not request this, please ignore this email."
+                )
+                
+                # Create the message
                 message = SG_Mail(
                     from_email=(sender_email, custom_sender_name),
                     to_emails=email,
@@ -161,7 +169,19 @@ def view_history():
         return redirect(url_for("login"))
     user_history = History.query.filter_by(user_id=user.id).order_by(History.timestamp.desc()).all()
     return render_template("history.html", history=user_history, user=session.get("user"))
-
+@app.route("/reset-password/<email>", methods=["GET", "POST"])
+def reset_password(email):
+    if request.method == "POST":
+        new_password = request.form.get("password")
+        user = User.query.filter_by(email=email).first()
+        
+        if user:
+            # Update the password with a new hash
+            user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+            db.session.commit()
+            return redirect(url_for('login'))
+            
+    return render_template("reset_password.html", email=email)
 # --- ANALYZER LOGIC ---
 
 @app.route("/analyze", methods=["POST"])
