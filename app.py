@@ -7,7 +7,10 @@ from datetime import datetime
 import os
 import sendgrid
 from sendgrid.helpers.mail import Mail as SG_Mail
-
+import re
+import os
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 CORS(app)
 
@@ -182,8 +185,7 @@ def reset_password(email):
             return redirect(url_for('login'))
             
     return render_template("reset_password.html", email=email)
-# --- ANALYZER LOGIC ---
-
+# --- ANALYZER ROUTE ---
 @app.route("/analyze", methods=["POST"])
 def analyze():
     if "user_id" not in session:
@@ -196,27 +198,66 @@ def analyze():
     code = data.get("code", "")
     language = data.get("language", "Python")
     
-    status = "success"
-    message = "No syntax errors found!"
+    # Run the Basic + Complex analysis
+    message = analyze_code(code, language)
+    status = "error" if "Error" in message or "Warning" in message else "success"
 
-    if language == "Python":
-        try:
-            compile(code, "<string>", "exec")
-        except SyntaxError as e:
-            status = "error"
-            message = f"Python Error: '{e.msg}' on line {e.lineno}."
-    
-    elif language == "Java" or language == "C++":
-        if code.count("{") != code.count("}"):
-            status = "error"
-            message = f"{language} Error: Mismatched Curly Braces."
-
-    new_entry = History(code_content=code, result=message, language=language, user_id=session["user_id"])
+    # Save to Database History
+    new_entry = History(
+        code_content=code, 
+        result=message, 
+        language=language, 
+        user_id=session["user_id"]
+    )
     db.session.add(new_entry)
     db.session.commit()
 
     return jsonify({"status": status, "message": message})
 
+
+# --- ENHANCED ANALYZER FUNCTION (Basic + Complex) ---
+def analyze_code(code, language):
+    errors = []
+    
+    # --- 1. PYTHON CHECK (Basic + Complex) ---
+    if language == "Python":
+        try:
+            # Basic: Catches syntax, colons, and indentation
+            compile(code, "<string>", "exec") 
+            
+            # Complex: Logic check for potential crash
+            if "/" in code and "len(" not in code and "if" not in code:
+                errors.append("Python Logic Warning: Potential ZeroDivisionError in calculation.")
+        except SyntaxError as e:
+            errors.append(f"Python Error: '{e.msg}' on line {e.lineno}.")
+
+    # --- 2. C++ CHECK (Basic + Complex) ---
+    elif language == "C++":
+        # Basic: Braces
+        if code.count('{') != code.count('}'):
+            errors.append("C++ Error: Mismatched Curly Braces.")
+        
+        # Complex: Missing semicolon after class
+        if re.search(r'(class|struct)\s+\w+\s*\{[\s\S]*?\}\s*(?!;)', code):
+            errors.append("C++ Error: Missing semicolon ';' after class definition.")
+            
+        # Complex: Out of bounds
+        if re.search(r'<=\s*\w+\.size\(\)', code):
+            errors.append("C++ Logic Error: Potential Out-of-Bounds (use '<' instead of '<=').")
+
+    # --- 3. JAVA CHECK (Basic + Complex) ---
+    elif language == "Java":
+        # Basic: Braces
+        if code.count('{') != code.count('}'):
+            errors.append("Java Error: Mismatched Curly Braces.")
+            
+        # Complex: Static vs Non-static
+        if "public static void main" in code and re.search(r'(?<!new\s)\b\w+\(\);', code):
+            # Exclude standard keywords to avoid false positives
+            if not re.search(r'\b(System|if|for|while|switch)\b', code):
+                errors.append("Java Error: Cannot call non-static method from static main.")
+
+    return errors[0] if errors else "Success: No syntax errors found!"
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=True)
