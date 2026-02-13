@@ -38,22 +38,20 @@
 
                 <div class="separator">Or</div>
 
-                <div class="social-grid">
-                    <a href="#" class="social-item">
-                        <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18">
-                        Sign in with Google
-                    </a>
-                   <div class="social-grid">
-    <a href="{{ url_for('google_login') }}" class="social-item">
-        <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18">
-        Sign in with Google
+                <div class="social-grid" style="display: flex; gap: 10px; margin-top: 20px;">
+    <a href="{{ url_for('google_login') }}" class="social-item" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-decoration: none; color: #333; font-size: 14px;">
+        <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18" style="margin-right: 8px;">
+        Google
     </a>
 
-    <a href="#" class="social-item">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" width="18">
-        Sign in with Apple
+    <a href="#" class="social-item" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-decoration: none; color: #333; font-size: 14px;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" width="18" style="margin-right: 8px;">
+        Apple
     </a>
 </div>
+                  
+
+  
 
             <div class="visual-container">
                 <div class="robot-circle">
