@@ -11,6 +11,8 @@ import re
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
+import os
+from authlib.integrations.flask_client import OAuth
 app = Flask(__name__)
 CORS(app)
 
@@ -54,6 +56,15 @@ class History(db.Model):
 with app.app_context():
     db.create_all()
 
+# --- GOOGLE OAUTH SETUP ---
+oauth = OAuth(app)
+google = oauth.register(
+    name='google',
+    client_id=os.environ.get("GOOGLE_CLIENT_ID"),
+    client_secret=os.environ.get("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid email profile'}
+)
 # --- AUTHENTICATION ROUTES ---
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -264,6 +275,28 @@ def analyze_code(code, language):
         # Join errors with line breaks for a detailed list
         return "<br>• " + "<br>• ".join(errors)
     return "Success: No syntax errors found!"
+
+@app.route('/login/google')
+def google_login():
+    # External=True is vital for Railway to generate the correct URL
+    redirect_uri = url_for('google_authorize', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+@app.route('/login/google/authorized')
+def google_authorize():
+    token = google.authorize_access_token()
+    user_info = token.get('userinfo')
+    
+    # Check if user exists
+    user = User.query.filter_by(email=user_info['email']).first()
+    if not user:
+        # Create user if they are new
+        user = User(username=user_info['name'], email=user_info['email'], password="google_auth_user")
+        db.session.add(user)
+        db.session.commit()
+    
+    session["user_id"] = user.id
+    return redirect(url_for('dashboard'))
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=True)
